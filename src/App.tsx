@@ -517,7 +517,7 @@ export default function App() {
   return (
     <main>
       <header>
-        <div>
+        <div className="headerMain">
           <h1>
             One More Card?! <small>{g.difficulty}</small>{" "}
             <em>Level {g.enemyLevel}</em>
@@ -653,13 +653,17 @@ export default function App() {
                     !b;
                 return (
                   <button
-                    className={`legend ${b ? "blocked" : ""} ${g.selected[s] ? "selected" : ""}`}
-                    disabled={!selectable}
-                    onClick={() =>
-                      setG({
-                        ...g,
-                        selected: { ...g.selected, [s]: !g.selected[s] },
-                      })
+                    className={`legend ${b ? "blocked" : ""} ${g.legendUsed[s] ? "used" : ""} ${selectable ? "available" : "inactive"} ${g.selected[s] ? "selected" : ""}`}
+                    aria-disabled={!selectable}
+                    tabIndex={selectable ? 0 : -1}
+                    onClick={
+                      selectable
+                        ? () =>
+                            setG({
+                              ...g,
+                              selected: { ...g.selected, [s]: !g.selected[s] },
+                            })
+                        : undefined
                     }
                   >
                     <h3
@@ -671,16 +675,7 @@ export default function App() {
                     >
                       {META[s].s} {META[s].n}
                     </h3>
-                    <span>
-                      {g.legendUsed[s]
-                        ? "Used"
-                        : b
-                          ? "Blocked"
-                          : selectable
-                            ? "Select"
-                            : ""}
-                    </span>
-                    {/* Képernyőn kiskártyák, mobilon tömör értéklista látszik. */}
+                    {/* Képernyőn small card, mobilon rank-only mini kártya jelenik meg. */}
                     <div className="legendCards">
                       {g.legends[s].length ? (
                         displayCards(g.legends[s]).map((c) => (
@@ -689,16 +684,6 @@ export default function App() {
                       ) : (
                         <span>Empty</span>
                       )}
-                    </div>
-                    <div className="legendSummary">
-                      <strong>{g.legends[s].length} cards:</strong>
-                      <span>
-                        {g.legends[s].length
-                          ? displayCards(g.legends[s])
-                              .map((c) => c.rank)
-                              .join(", ")
-                          : "–"}
-                      </span>
                     </div>
                   </button>
                 );

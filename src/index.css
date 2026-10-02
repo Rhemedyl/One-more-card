@@ -731,3 +731,156 @@ header button,
     grid-template-columns: 1fr;
   }
 }
+
+/* ================================================================
+   LEGUTÓBBI MOBIL HEADER ÉS LEGEND AREA FINOMHANGOLÁSOK
+   ================================================================ */
+
+/* A fejléc bal oldali címes és információs része. */
+.headerMain {
+  min-width: 0;
+}
+
+/* A Legend Area gomboknál nem használunk natív disabled állapotot,
+   ezért a böngésző nem halványítja el automatikusan a teljes tartalmat. */
+.legend[aria-disabled="true"] {
+  color: #111827;
+  cursor: default;
+  opacity: 1;
+}
+
+/* Alap, pillanatnyilag nem aktiválható Legend Area háttérszíne. */
+.legend.inactive {
+  color: #111827;
+  background: #f8fafc;
+  border-color: #64748b;
+}
+
+/* Aktiválható Legend Area enyhén zöld háttérrel jelzi, hogy kattintható. */
+.legend.available {
+  color: #111827;
+  background: #ecfdf5;
+  border-color: #34d399;
+  cursor: pointer;
+}
+
+/* Blokkolt Legend Area szürkés háttere. A tartalom kontrasztos marad. */
+.legend.blocked {
+  color: #111827;
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  filter: none;
+  opacity: 1;
+  text-decoration: none;
+}
+
+/* Csak a blokkolt terület címsora húzódik át. */
+.legend.blocked h3 {
+  color: #111827;
+  text-decoration: line-through;
+  opacity: 1;
+}
+
+/* Használt Legend Area meleg, halvány háttérszíne. */
+.legend.used {
+  color: #111827;
+  background: #fff7ed;
+  border-color: #fb923c;
+  filter: none;
+  opacity: 1;
+}
+
+/* Csak a használt terület címsora lesz dőlt és enyhén döntött. */
+.legend.used h3 {
+  color: #111827;
+  font-style: italic;
+  transform: skew(-10deg);
+  transform-origin: left center;
+}
+
+/* Ha egy Legend Area egyszerre használt és blokkolt, kevert háttérszínt kap. */
+.legend.used.blocked {
+  background: #f1e7dc;
+  border-color: #a8a29e;
+}
+
+/* A kiválasztott Legend Area háttere és külső kiemelése. */
+.legend.selected {
+  background: #ede9fe;
+  border-color: #8b5cf6;
+  outline: 4px solid #c4b5fd;
+}
+
+@media (max-width: 800px) {
+  /* Mobilon a fejléc két oszlopos rács lesz:
+     cím balra, műveletek jobbra, az információs szöveg teljes szélességben alul. */
+  header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  /* A wrapper tartalma úgy vesz részt a gridben, mintha közvetlen gyermek lenne. */
+  .headerMain {
+    display: contents;
+  }
+
+  /* A cím jóval kisebb, hogy ne uralja a mobilos fejlécet. */
+  header h1 {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    font-size: 17px;
+    line-height: 1.15;
+  }
+
+  /* A rendezési kapcsoló és New game gomb a cím mellett marad. */
+  .headerActions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* Az alsó információs szöveg mindkét oszlop teljes szélességét használja. */
+  header p {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  /* Mobilon a Legend Area kártyái valódi mini kártyákká válnak. */
+  .legendCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 24px);
+    gap: 3px;
+    margin-top: 5px;
+  }
+
+  /* A mini kártya teljes keretet kap, és a rang normál méretben középen látszik. */
+  .legendCards .card,
+  .legendCards .card.small {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 32px;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    background: #fff;
+    border: 1px solid #64748b;
+    border-radius: 4px;
+  }
+
+  /* A mobilos mini kártyán nincs középső suit-jel és fordított alsó rang. */
+  .legendCards .card strong,
+  .legendCards .card b:last-child {
+    display: none;
+  }
+
+  /* A felső rang normál betűmérettel tölti ki a mini kártya közepét. */
+  .legendCards .card b:first-child {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+  }
+}
