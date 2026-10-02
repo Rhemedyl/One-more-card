@@ -144,7 +144,7 @@ function fresh(d: Difficulty): Game {
 }
 function CardView({
   c,
-  small = false,
+  small = true,
   last = false,
   onClick,
 }: {
@@ -524,21 +524,69 @@ export default function App() {
           </h1>
           <p>{g.notice}</p>
         </div>
-        <button onClick={() => setReset(true)}>
-          <RotateCcw /> New game
-        </button>
+        {/* A címsor jobb oldalán a rendezési könnyítés és az új játék gombja kap fix helyet. */}
+        <div className="headerActions">
+          <label className="sortToggle">
+            <input
+              type="checkbox"
+              checked={sortCards}
+              onChange={(e) => setSortCards(e.target.checked)}
+            />
+            Sort cards by value
+          </label>
+          <button onClick={() => setReset(true)}>
+            <RotateCcw /> New game
+          </button>
+        </div>
       </header>
-      <div className="morales">
-        <Stat title="Current Morale" value={g.currentMorale} icon={<Heart />} />
-        <Stat
-          title="Maximum Morale"
-          value={g.maximumMorale}
-          icon={<Shield />}
-        />
-        <Stat title="Enemy Morale" value={g.enemyMorale} icon={<Swords />} />
+
+      {/* Kompakt felső állapotsor: három Morale-érték, a két pakli és a megmaradt Jokerek. */}
+      <div className="topStatus">
+        <div className="morales">
+          <Stat
+            title="Current Morale"
+            value={g.currentMorale}
+            icon={<Heart />}
+          />
+          <Stat
+            title="Maximum Morale"
+            value={g.maximumMorale}
+            icon={<Shield />}
+          />
+          <Stat title="Enemy Morale" value={g.enemyMorale} icon={<Swords />} />
+        </div>
+        {/* A paklik kisebb kártyaméretű vizuális jelölést és lapszámlálót kapnak. */}
+        <div className="topDecks">
+          <Stack n={g.enemyDeck.length} label="Enemy Deck" />
+          <Stack n={g.attackDeck.length} label="Attack Deck" />
+        </div>
+        {/* A Jokerek small card méretű üres kártyahelyeken jelennek meg. */}
+        <div className="jokerPanel">
+          <small>Jokers</small>
+          <div className="jokerCards">
+            {[0, 1].map((index) => (
+              <div
+                key={index}
+                className={`jokerCard ${index >= g.jokers ? "used" : ""}`}
+              >
+                {index < g.jokers ? "🃏" : "×"}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* A Current Enemy közvetlenül a fázissáv bal szélén jelenik meg. A második hely J&Q előtt is megmarad üresen. */}
       <section className={`phase ${g.phase.toLowerCase()}`}>
-        <div>
+        <div className="phaseEnemy">
+          {active && <CardView c={active} />}
+          {queen ? (
+            <CardView c={queen} />
+          ) : (
+            <div className="card small enemyPlaceholder" />
+          )}
+        </div>
+        <div className="phaseInfo">
           <small>Current phase</small>
           <h2>{g.phase}</h2>
           <p>
@@ -552,28 +600,35 @@ export default function App() {
           )}
         </div>
         <div className="actions">
+          {/* A dinamikus Treff-opciók mindig a két fix húzási gomb elé kerülnek. */}
           {g.phase === "DRAWING" && (
             <>
-              <button onClick={draw}>Draw card</button>
-              <button onClick={stop} disabled={!g.battleground.length}>
-                Stop drawing
-              </button>
-              {battleClubs.map((c) => (
-                <button
-                  disabled={blocked("clubs")}
-                  onClick={() => askClub("battle", c.id)}
-                >
-                  Use {c.rank}♣
+              <div className="clubActions">
+                {battleClubs.map((c) => (
+                  <button
+                    key={c.id}
+                    disabled={blocked("clubs")}
+                    onClick={() => askClub("battle", c.id)}
+                  >
+                    Use {c.rank}♣
+                  </button>
+                ))}
+                {g.legends.clubs.length > 0 && !g.legendUsed.clubs && (
+                  <button
+                    disabled={blocked("clubs", true)}
+                    onClick={() => askClub("legend")}
+                  >
+                    Use Club Legend
+                  </button>
+                )}
+              </div>
+              {/* Ez a két gomb fixen a fázissáv jobb szélén marad. */}
+              <div className="fixedDrawActions">
+                <button onClick={draw}>Draw card</button>
+                <button onClick={stop} disabled={!g.battleground.length}>
+                  Stop drawing
                 </button>
-              ))}
-              {g.legends.clubs.length > 0 && !g.legendUsed.clubs && (
-                <button
-                  disabled={blocked("clubs", true)}
-                  onClick={() => askClub("legend")}
-                >
-                  Use Club Legend
-                </button>
-              )}
+              </div>
             </>
           )}
           {g.phase === "RESOLUTION" && (
@@ -625,14 +680,25 @@ export default function App() {
                             ? "Select"
                             : ""}
                     </span>
+                    {/* Képernyőn kiskártyák, mobilon tömör szöveges lista látszik ugyanarról a tartalomról. */}
                     <div className="legendCards">
                       {g.legends[s].length ? (
                         displayCards(g.legends[s]).map((c) => (
-                          <CardView key={c.id} c={c} small />
+                          <CardView key={c.id} c={c} />
                         ))
                       ) : (
                         <span>Empty</span>
                       )}
+                    </div>
+                    <div className="legendSummary">
+                      <strong>{g.legends[s].length} cards:</strong>
+                      <span>
+                        {g.legends[s].length
+                          ? displayCards(g.legends[s])
+                              .map((c) => c.rank)
+                              .join(", ")
+                          : "–"}
+                      </span>
                     </div>
                   </button>
                 );
@@ -672,40 +738,6 @@ export default function App() {
             </Area>
           )}
         </div>
-        <aside>
-          <div className="enemy">
-            <div className="cards">
-              {active && <CardView c={active} />}{" "}
-              {queen && <CardView c={queen} />}
-            </div>
-            <b>{queen ? "Jacks & Queens" : `Four ${g.enemyRank}s`}</b>
-{/*             <div className="blockedSuits">
-              {activeSuits.map((s) => (
-                <span>
-                  {META[s].s} {META[s].n}
-                </span>
-              ))}
-            </div> */}
-          </div>
-          <div className="decks">
-            <Stack n={g.enemyDeck.length} label="Enemy Deck" />
-            <Stack n={g.attackDeck.length} label="Attack Deck" />
-          </div>
-          <div className="jokers">
-            Jokers <b>{"🃏".repeat(g.jokers) || "–"}</b>
-          </div>
-          <div className="utilityRow">
-            <label className="sortToggle">
-            <input
-              type="checkbox"
-              checked={sortCards}
-              onChange={(e) => setSortCards(e.target.checked)}
-            />{" "}
-            Sort cards by value
-          </label>
-        </div>
-
-        </aside>
       </div>
       {g.phase === "BATTLE_END" && (
         <Modal>
