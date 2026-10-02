@@ -1129,37 +1129,34 @@ header button,
 }
 
 /* ================================================================
-   JOKEREK A PAKLIKÁRTYÁKKAL AZONOS MÉRETBEN
+   JOKER FIGURÁK KERET NÉLKÜL, PAKLIMÉRETBEN
    ================================================================ */
 
-/*
-  A Joker-panel szélessége a két egymás melletti, paklihátlap méretű Jokerhez igazodik.
-  A panel ugyanazt a belső térközt használja, mint a szomszédos paklipanel.
-*/
+/* A külső panel kényelmesen körülöleli a két nagy Joker figurát. */
 .jokerPanel {
-  width: auto;
+  width: max-content;
   min-width: 0;
   height: auto;
   align-self: stretch;
-  justify-self: auto;
+  justify-self: end;
   padding: 6px 8px;
   gap: 5px;
   overflow: visible;
 }
 
-/* A két Joker ismét egymás mellett, kis távolsággal jelenik meg. */
+/* A két Joker vízszintesen, kis távolsággal helyezkedik el. */
 .jokerCards {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(2, 54px);
   align-items: center;
   justify-content: center;
-  width: auto;
+  width: max-content;
   gap: 6px;
 }
 
 /*
-  Egy Joker pontosan akkora, mint a szomszédos Enemy Deck és Attack Deck hátlapja:
-  54 pixel széles és 78 pixel magas.
+  Nincs kártyakeret és kártyaháttér. A Joker emoji maga tölti ki a
+  paklihátlap 54 × 78 pixeles területét.
 */
 .jokerCard,
 .jokerCard.used {
@@ -1169,28 +1166,36 @@ header button,
   height: 78px;
   padding: 0;
   margin: 0;
-  font-size: 38px;
+  font-size: 64px;
   line-height: 1;
-  background: #fff;
-  border: 2px solid #cbd5e1;
-  border-radius: 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
 }
 
-/* Az elhasznált Joker megtartja ugyanazt a méretet, csak vizuálisan halványabb. */
+/* Az elhasznált Joker helye megmarad, de halványan jelenik meg. */
 .jokerCard.used {
   color: #94a3b8;
-  background: #f1f5f9;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 @media (max-width: 800px) {
-  /* Mobilon is ugyanaz a 54 × 78 pixeles méret és vízszintes elrendezés marad. */
+  /* Mobilon is két, egymás melletti pakliméretű Joker marad. */
   .jokerPanel {
+    width: max-content;
     padding: 6px 8px;
   }
 
   .jokerCards {
-    flex-direction: row;
+    grid-template-columns: repeat(2, 54px);
     gap: 6px;
+  }
+
+  .jokerCard,
+  .jokerCard.used {
+    width: 54px;
+    height: 78px;
+    font-size: 64px;
   }
 }
