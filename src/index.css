@@ -989,3 +989,83 @@ header button,
 .resolutionWalkthrough strong {
   color: #111827;
 }
+
+/* A részletes kiértékelés Elfogadás gombja világos háttéren sötét feliratot használ. */
+.resolutionComplete .primary {
+  color: #111827;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+/* ================================================================
+   MOBILOS HEADER VÉGLEGES SORRENDJE
+   ================================================================ */
+
+@media (max-width: 800px) {
+  /*
+    A mobilos fejléc három soros rács:
+    1. sor: cím + nehézség + szint teljes szélességben;
+    2. sor: checkboxok, Új játék + Szabálykönyv, nyelvváltó;
+    3. sor: az utolsó játékesemény teljes szélességben.
+  */
+  header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto auto;
+    align-items: start;
+    gap: 7px 8px;
+  }
+
+  /* A headerMain gyermekei közvetlenül a header rácsában helyezkednek el. */
+  .headerMain {
+    display: contents;
+  }
+
+  /* Első sor: a teljes cím, nehézség és szint együtt, teljes szélességben. */
+  header h1 {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Második sor: a három vezérlőcsoport egymás mellett. */
+  .headerActions {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: start;
+    gap: 7px;
+    width: 100%;
+  }
+
+  /* A két checkbox bal oldalon, egymás alatt marad. */
+  .headerToggles {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  /* New game és Rulebook középen, egymás alatt. */
+  .headerButtonStack {
+    grid-column: 2;
+    min-width: max-content;
+  }
+
+  /* A nyelvváltó a második sor jobb szélén marad. */
+  .languageSwitch.compact {
+    grid-column: 3;
+    align-self: start;
+  }
+
+  /* Harmadik sor: az utolsó esemény teljes szélességben. */
+  header p {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    margin: 0;
+  }
+}

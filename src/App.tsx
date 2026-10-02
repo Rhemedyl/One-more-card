@@ -140,7 +140,7 @@ const I18N = {
     rawCounter: "Raw counterattack",
     finalCounter: "Final counterattack",
     cardSum: "Sum of cards",
-    applyResolution: "Apply resolution",
+    applyResolution: "Accept",
     empty: "Empty",
     clubsName: "Clubs",
     diamondsName: "Diamonds",
@@ -214,7 +214,7 @@ const I18N = {
     rawCounter: "Nyers visszatámadás",
     finalCounter: "Végső visszatámadás",
     cardSum: "Lapok összege",
-    applyResolution: "Kiértékelés alkalmazása",
+    applyResolution: "Elfogadás",
     empty: "Üres",
     clubsName: "Treff",
     diamondsName: "Káró",
@@ -1133,6 +1133,10 @@ export default function App() {
               ))}
             </div>
           </Area>
+          {/*
+            Az előző kiértékelés összefoglalója ideiglenesen kikommentelve.
+            Később átalakítva egyszerűen visszakapcsolható.
+
           {g.summary && (
             <Area title={t("lastResolution")}>
               <p>
@@ -1142,7 +1146,8 @@ export default function App() {
                 {g.summary.joker ? t("used") : t("no")}
               </p>
             </Area>
-          )}
+          )} 
+          */}
         </div>
       </div>
       {g.phase === "BATTLE_END" && (
