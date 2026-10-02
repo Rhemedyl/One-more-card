@@ -229,11 +229,11 @@ header button,
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-width: 66px;
+  min-width: 40px;
 /*  padding: 6px 8px;*/
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 14px;
+  border-radius: 10px;
 }
 
 /* A két Joker egymás melletti sora. */
