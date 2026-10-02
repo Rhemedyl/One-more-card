@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Heart, Shield, Swords, RotateCcw } from "lucide-react";
 
+type Language = "en" | "hu";
 type Difficulty = "Easy" | "Normal" | "Hard";
 type Suit = "clubs" | "diamonds" | "hearts" | "spades";
 type Rank =
@@ -46,6 +47,126 @@ type Game = {
   summary: Summary | null;
   victory: boolean;
 };
+const RULEBOOK_URL =
+  "https://drive.google.com/file/d/1E3ozP6v9BC3FDe7qAlg0YvCEZMPaB_CR/view";
+const I18N = {
+  en: {
+    subtitle: "Interactive campaign prototype",
+    easy: "Easy",
+    normal: "Normal",
+    hard: "Hard",
+    morale: "Morale",
+    start: "Start {difficulty} Game",
+    rulebook: "Rulebook",
+    readRules: "Read the Rulebook",
+    newGame: "New game",
+    sort: "Sort cards by value",
+    level: "Level",
+    currentMorale: "Current Morale",
+    maximumMorale: "Maximum Morale",
+    enemyMorale: "Enemy Morale",
+    enemyDeck: "Enemy Deck",
+    attackDeck: "Attack Deck",
+    jokers: "Jokers",
+    currentPhase: "Current phase",
+    cards: "Cards",
+    basePower: "Base Power",
+    draw: "Draw card",
+    stop: "Stop drawing",
+    useClub: "Use {rank}♣",
+    useClubLegend: "Use Club Legend",
+    resolve: "Resolve attack",
+    continueCampaign: "Continue campaign",
+    legends: "Legend Areas",
+    battleground: "Battleground",
+    clubSelection: "Club Selection",
+    discard: "Discard Pile",
+    lastResolution: "Last resolution",
+    available:
+      "{selected} of {available} available Legend Areas were activated",
+    congratulations: "Congratulations!",
+    defeated:
+      "You defeated the {rank}s. The defeated cards have joined your side.",
+    finish: "Finish campaign",
+    won: "Congratulations, you won!",
+    lost: "Unfortunately, you lost.",
+    wonText: "You defeated the King and completed the campaign.",
+    startNew: "Start a new game",
+    resetTitle: "Start a new game?",
+    resetText: "The current game will be replaced.",
+    cancel: "Cancel",
+    noCards: "No cards remain",
+    noCardsText:
+      "The Attack Deck and Discard Pile are both empty. If you draw now, you lose the game.",
+    drawLose: "Draw and lose",
+    clubWarn: "Use Club at 1 Morale?",
+    clubWarnText: "A Joker will be spent immediately if available.",
+    continue: "Continue",
+    used: "used",
+    no: "no",
+  },
+  hu: {
+    subtitle: "Interaktív kampányprototípus",
+    easy: "Könnyű",
+    normal: "Normál",
+    hard: "Nehéz",
+    morale: "Morál",
+    start: "{difficulty} játék indítása",
+    rulebook: "Szabálykönyv (angol)",
+    readRules: "Szabálykönyv megnyitása (angol)",
+    newGame: "Új játék",
+    sort: "Lapok rendezése érték szerint",
+    level: "Szint",
+    currentMorale: "Aktuális Morál",
+    maximumMorale: "Maximális Morál",
+    enemyMorale: "Ellenfél Morálja",
+    enemyDeck: "Ellenségpakli",
+    attackDeck: "Támadópakli",
+    jokers: "Jokerek",
+    currentPhase: "Aktuális fázis",
+    cards: "Lapok",
+    basePower: "Alaperő",
+    draw: "Laphúzás",
+    stop: "Megállás",
+    useClub: "{rank}♣ használata",
+    useClubLegend: "Treff Legenda használata",
+    resolve: "Támadás kiértékelése",
+    continueCampaign: "Kampány folytatása",
+    legends: "Legenda-területek",
+    battleground: "Csatatér",
+    clubSelection: "Treff lapválasztás",
+    discard: "Dobópakli",
+    lastResolution: "Előző kiértékelés",
+    available: "{selected}/{available} elérhető Legenda-terület aktiválva",
+    congratulations: "Gratulálok!",
+    defeated:
+      "Legyőzted a(z) {rank} értékű ellenfeleket. A lapok most hozzád álltak.",
+    finish: "Kampány befejezése",
+    won: "Gratulálok, nyertél!",
+    lost: "Sajnos elveszítetted a játékot.",
+    wonText: "Legyőzted a Királyt és teljesítetted a kampányt.",
+    startNew: "Új játék indítása",
+    resetTitle: "Új játékot kezdesz?",
+    resetText: "A jelenlegi játékállás elveszik.",
+    cancel: "Mégse",
+    noCards: "Nincs több húzható lap",
+    noCardsText:
+      "A Támadópakli és a Dobópakli is üres. Ha most húzol, elveszíted a játékot.",
+    drawLose: "Húzás és vereség",
+    clubWarn: "Treff használata 1 Morálnál?",
+    clubWarnText: "Ha van elérhető Joker, azonnal felhasználódik.",
+    continue: "Folytatás",
+    used: "felhasználva",
+    no: "nem",
+  },
+} as const;
+type TKey = keyof typeof I18N.en;
+const template = (text: string, values: Record<string, string | number> = {}) =>
+  Object.entries(values).reduce(
+    (r, [k, v]) => r.replaceAll(`{${k}}`, String(v)),
+    text,
+  );
+
 const SUITS: Suit[] = ["clubs", "diamonds", "hearts", "spades"];
 const RANKS: Rank[] = [
   "A",
@@ -184,6 +305,69 @@ function Modal({ children }: { children: React.ReactNode }) {
   );
 }
 export default function App() {
+  const [language, setLanguage] = useState<Language>(() =>
+    localStorage.getItem("one-more-card-language") === "hu" ? "hu" : "en",
+  );
+  const setLang = (value: Language) => {
+    localStorage.setItem("one-more-card-language", value);
+    setLanguage(value);
+  };
+  const t = (key: TKey, values?: Record<string, string | number>) =>
+    template(I18N[language][key], values);
+  const difficultyName = (d: Difficulty) =>
+    d === "Easy" ? t("easy") : d === "Normal" ? t("normal") : t("hard");
+  const phaseName = (p: Phase) =>
+    p === "DRAWING"
+      ? language === "hu"
+        ? "HÚZÁS"
+        : "DRAWING"
+      : p === "CLUB_SELECTION"
+        ? language === "hu"
+          ? "TREFF VÁLASZTÁS"
+          : "CLUB SELECTION"
+        : p === "RESOLUTION"
+          ? language === "hu"
+            ? "KIÉRTÉKELÉS"
+            : "RESOLUTION"
+          : p === "BATTLE_END"
+            ? language === "hu"
+              ? "CSATA VÉGE"
+              : "BATTLE END"
+            : language === "hu"
+              ? "JÁTÉK VÉGE"
+              : "GAME OVER";
+  const noticeText = (n: string) => {
+    if (language === "en") return n;
+    const m: Record<string, string> = {
+      "The first battle is ready. Draw the first Attack card.":
+        "Az első csata előkészítve. Húzd fel az első Támadólapot.",
+      "No drawable card exists.": "Nincs több húzható lap.",
+      "Choose optional Legend abilities, then resolve.":
+        "Válaszd ki az opcionális Legenda-képességeket, majd értékeld ki a támadást.",
+      "The Club cost reduced Morale below 1.":
+        "A Treff költsége 1 alá csökkentette a Morált.",
+      "Your Morale fell below 1 and no Joker remained.":
+        "A Morálod 1 alá csökkent, és nem maradt Jokered.",
+      "Enemy defeated. The final counterattack was survived.":
+        "Az ellenfél legyőzve. Túlélted az utolsó visszatámadást.",
+      "You defeated the King.": "Legyőzted a Királyt.",
+      "Jacks and Queens attack together.": "A Bubik és Dámák együtt támadnak.",
+      "The final King battle begins.":
+        "Elkezdődik a Király elleni utolsó csata.",
+    };
+    if (m[n]) return m[n];
+    let x = n.match(/^Duplicate (.+) detected/);
+    if (x) return `Duplikált érték: ${x[1]}. Az Alaperő 0.`;
+    x = n.match(/^(.+) entered the Battleground/);
+    if (x) return `${x[1]} a Csatatérre került.`;
+    x = n.match(/^Choose one of (\d+) cards/);
+    if (x) return `Válassz egy lapot a(z) ${x[1]} lap közül.`;
+    x = n.match(/^(.+) became a Legend/);
+    if (x) return `${x[1]} Legendává vált.`;
+    x = n.match(/^The (.+)s are ready/);
+    if (x) return `A(z) ${x[1]} értékű ellenfelek készen állnak.`;
+    return n;
+  };
   const [difficulty, setDifficulty] = useState<Difficulty>("Normal");
   const [g, setG] = useState<Game | null>(null);
   const [reset, setReset] = useState(false);
@@ -202,21 +386,32 @@ export default function App() {
     return (
       <main className="menu">
         <h1>One More Card?!</h1>
-        <p>Interactive campaign prototype</p>
+        <p>{t("subtitle")}</p>
         <div className="difficulty">
           {(["Easy", "Normal", "Hard"] as Difficulty[]).map((d) => (
             <button
               className={difficulty === d ? "chosen" : ""}
               onClick={() => setDifficulty(d)}
             >
-              <b>{d}</b>
-              <span>{MORALE[d]} Morale</span>
+              <b>{difficultyName(d)}</b>
+              <span>
+                {MORALE[d]} {t("morale")}
+              </span>
             </button>
           ))}
         </div>
         <button className="primary" onClick={() => setG(fresh(difficulty))}>
           Start {difficulty} Game
         </button>
+        <a
+          className="rulebookLink menuRulebookLink"
+          href={RULEBOOK_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t("readRules")}
+        </a>
+        <LanguageSwitch language={language} onChange={setLang} />
       </main>
     );
   const loseMorale = (x: Game, n: number) => {
@@ -520,9 +715,11 @@ export default function App() {
         <div className="headerMain">
           <h1>
             One More Card?! <small>{g.difficulty}</small>{" "}
-            <em>Level {g.enemyLevel}</em>
+            <em>
+              {t("level")} {g.enemyLevel}
+            </em>
           </h1>
-          <p>{g.notice}</p>
+          <p>{noticeText(g.notice)}</p>
         </div>
         {/* Jobb oldali fejlécműveletek: rendezési könnyítés és új játék. */}
         <div className="headerActions">
@@ -534,9 +731,20 @@ export default function App() {
             />
             Sort cards by value
           </label>
-          <button onClick={() => setReset(true)}>
-            <RotateCcw /> New game
-          </button>
+          <div className="headerButtonStack">
+            <button onClick={() => setReset(true)}>
+              <RotateCcw /> {t("newGame")}
+            </button>
+            <a
+              className="rulebookLink headerRulebookLink"
+              href={RULEBOOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("rulebook")}
+            </a>
+          </div>
+          <LanguageSwitch language={language} onChange={setLang} compact />
         </div>
       </header>
 
@@ -544,25 +752,29 @@ export default function App() {
       <div className="topStatus">
         <div className="morales">
           <Stat
-            title="Current Morale"
+            title={t("currentMorale")}
             value={g.currentMorale}
             icon={<Heart />}
           />
           <Stat
-            title="Maximum Morale"
+            title={t("maximumMorale")}
             value={g.maximumMorale}
             icon={<Shield />}
           />
-          <Stat title="Enemy Morale" value={g.enemyMorale} icon={<Swords />} />
+          <Stat
+            title={t("enemyMorale")}
+            value={g.enemyMorale}
+            icon={<Swords />}
+          />
         </div>
         {/* Small card méretű Enemy Deck és Attack Deck. */}
         <div className="topDecks">
-          <Stack n={g.enemyDeck.length} label="Enemy Deck" />
-          <Stack n={g.attackDeck.length} label="Attack Deck" />
+          <Stack n={g.enemyDeck.length} label={t("enemyDeck")} />
+          <Stack n={g.attackDeck.length} label={t("attackDeck")} />
         </div>
         {/* Két small card méretű Joker-hely; az elhasznált Joker szürkítve marad. */}
         <div className="jokerPanel">
-          <small>Jokers</small>
+          <small>{t("jokers")}</small>
           <div className="jokerCards">
             {[0, 1].map((index) => (
               <div
@@ -587,15 +799,17 @@ export default function App() {
           )}
         </div>
         <div className="phaseInfo">
-          <small>Current phase</small>
-          <h2>{g.phase}</h2>
+          <small>{t("currentPhase")}</small>
+          <h2>{phaseName(g.phase)}</h2>
           <p>
-            Cards {g.battleground.length} · Base Power {base}
+            {t("cards")} {g.battleground.length} · {t("basePower")} {base}
           </p>
           {g.phase === "RESOLUTION" && available.length > 0 && (
             <p>
-              {available.filter((s) => g.selected[s]).length} of{" "}
-              {available.length} available Legend Areas were activated
+              {t("available", {
+                selected: available.filter((s) => g.selected[s]).length,
+                available: available.length,
+              })}
             </p>
           )}
         </div>
@@ -610,7 +824,7 @@ export default function App() {
                     disabled={blocked("clubs")}
                     onClick={() => askClub("battle", c.id)}
                   >
-                    Use {c.rank}♣
+                    {t("useClub", { rank: c.rank })}
                   </button>
                 ))}
                 {g.legends.clubs.length > 0 && !g.legendUsed.clubs && (
@@ -624,7 +838,7 @@ export default function App() {
               </div>
               {/* A Draw card és Stop drawing fixen a jobb szélen marad. */}
               <div className="fixedDrawActions">
-                <button onClick={draw}>Draw card</button>
+                <button onClick={draw}>{t("draw")}</button>
                 <button onClick={stop} disabled={!g.battleground.length}>
                   Stop drawing
                 </button>
@@ -632,16 +846,16 @@ export default function App() {
             </>
           )}
           {g.phase === "RESOLUTION" && (
-            <button onClick={resolve}>Resolve attack</button>
+            <button onClick={resolve}>{t("resolve")}</button>
           )}
           {g.phase === "BATTLE_END" && (
-            <button onClick={nextBattle}>Continue campaign</button>
+            <button onClick={nextBattle}>{t("continueCampaign")}</button>
           )}
         </div>
       </section>
       <div className="board">
         <div>
-          <Area title="Legend Areas">
+          <Area title={t("legends")}>
             <div className="legendGrid">
               {SUITS.map((s) => {
                 const b = blocked(s, true),
@@ -653,17 +867,13 @@ export default function App() {
                     !b;
                 return (
                   <button
-                    className={`legend ${b ? "blocked" : ""} ${g.legendUsed[s] ? "used" : ""} ${selectable ? "available" : "inactive"} ${g.selected[s] ? "selected" : ""}`}
+                    className={`legend ${b ? "blocked" : ""} ${g.selected[s] ? "selected" : ""}`}
                     aria-disabled={!selectable}
-                    tabIndex={selectable ? 0 : -1}
-                    onClick={
-                      selectable
-                        ? () =>
-                            setG({
-                              ...g,
-                              selected: { ...g.selected, [s]: !g.selected[s] },
-                            })
-                        : undefined
+                    onClick={() =>
+                      setG({
+                        ...g,
+                        selected: { ...g.selected, [s]: !g.selected[s] },
+                      })
                     }
                   >
                     <h3
@@ -675,7 +885,7 @@ export default function App() {
                     >
                       {META[s].s} {META[s].n}
                     </h3>
-                    {/* Képernyőn small card, mobilon rank-only mini kártya jelenik meg. */}
+                    {/* Képernyőn kiskártyák, mobilon tömör értéklista látszik. */}
                     <div className="legendCards">
                       {g.legends[s].length ? (
                         displayCards(g.legends[s]).map((c) => (
@@ -690,7 +900,7 @@ export default function App() {
               })}
             </div>
           </Area>
-          <Area title="Battleground">
+          <Area title={t("battleground")}>
             <div className="cards">
               {g.battleground.map((c) => (
                 <CardView c={c} last={c.id === g.last} />
@@ -698,7 +908,7 @@ export default function App() {
             </div>
           </Area>
           {g.phase === "CLUB_SELECTION" && (
-            <Area title="Club Selection">
+            <Area title={t("clubSelection")}>
               <div className="cards">
                 {g.clubSelection.map((c) => (
                   <CardView c={c} onClick={() => chooseClub(c)} />
@@ -706,19 +916,20 @@ export default function App() {
               </div>
             </Area>
           )}
-          <Area title="Discard Pile">
-            <div className="cards">
+          <Area title={t("discard")}>
+            <div className="cards discardCards">
               {displayCards(g.discard).map((c) => (
                 <CardView key={c.id} c={c} small />
               ))}
             </div>
           </Area>
           {g.summary && (
-            <Area title="Last resolution">
+            <Area title={t("lastResolution")}>
               <p>
                 Base {g.summary.base} · ♠ +{g.summary.spade} · Total{" "}
                 {g.summary.total} · ♥ +{g.summary.heart} · Counter{" "}
-                {g.summary.counter} · Joker {g.summary.joker ? "used" : "no"}
+                {g.summary.counter} · {t("jokers")}{" "}
+                {g.summary.joker ? t("used") : t("no")}
               </p>
             </Area>
           )}
@@ -726,37 +937,26 @@ export default function App() {
       </div>
       {g.phase === "BATTLE_END" && (
         <Modal>
-          <h2>Congratulations!</h2>
-          <p>
-            You defeated the {g.enemyRank}s. The defeated cards have joined your
-            side.
-          </p>
+          <h2>{t("congratulations")}</h2>
+          <p>{t("defeated", { rank: g.enemyRank })}</p>
           <button className="primary" onClick={nextBattle}>
-            {g.enemyRank === "K" ? "Finish campaign" : "Continue campaign"}
+            {g.enemyRank === "K" ? t("finish") : t("continueCampaign")}
           </button>
         </Modal>
       )}
       {g.phase === "GAME_OVER" && (
         <Modal>
-          <h2>
-            {g.victory
-              ? "Congratulations, you won!"
-              : "Unfortunately, you lost."}
-          </h2>
-          <p>
-            {g.victory
-              ? "You defeated the King and completed the campaign."
-              : g.notice}
-          </p>
+          <h2>{g.victory ? t("won") : t("lost")}</h2>
+          <p>{g.victory ? t("wonText") : noticeText(g.notice)}</p>
           <button className="primary" onClick={() => setG(fresh(g.difficulty))}>
-            Start a new game
+            {t("startNew")}
           </button>
         </Modal>
       )}
       {reset && (
         <Modal>
-          <h2>Start a new game?</h2>
-          <p>The current game will be replaced.</p>
+          <h2>{t("resetTitle")}</h2>
+          <p>{t("resetText")}</p>
           <div className="actions">
             {(["Easy", "Normal", "Hard"] as Difficulty[]).map((d) => (
               <button
@@ -768,36 +968,33 @@ export default function App() {
                 {d}
               </button>
             ))}
-            <button onClick={() => setReset(false)}>Cancel</button>
+            <button onClick={() => setReset(false)}>{t("cancel")}</button>
           </div>
         </Modal>
       )}
       {drawWarn && (
         <Modal>
-          <h2>No cards remain</h2>
-          <p>
-            The Attack Deck and Discard Pile are both empty. If you draw now,
-            you lose the game.
-          </p>
+          <h2>{t("noCards")}</h2>
+          <p>{t("noCardsText")}</p>
           <div className="actions">
-            <button onClick={() => setDrawWarn(false)}>Cancel</button>
+            <button onClick={() => setDrawWarn(false)}>{t("cancel")}</button>
             <button
               onClick={() => {
                 setDrawWarn(false);
                 performDraw();
               }}
             >
-              Draw and lose
+              {t("drawLose")}
             </button>
           </div>
         </Modal>
       )}
       {clubWarn !== null && (
         <Modal>
-          <h2>Use Club at 1 Morale?</h2>
-          <p>A Joker will be spent immediately if available.</p>
+          <h2>{t("clubWarn")}</h2>
+          <p>{t("clubWarnText")}</p>
           <div className="actions">
-            <button onClick={() => setClubWarn(null)}>Cancel</button>
+            <button onClick={() => setClubWarn(null)}>{t("cancel")}</button>
             <button
               onClick={() => {
                 const p = clubWarn;
@@ -808,12 +1005,41 @@ export default function App() {
                 );
               }}
             >
-              Continue
+              {t("continue")}
             </button>
           </div>
         </Modal>
       )}
     </main>
+  );
+}
+function LanguageSwitch({
+  language,
+  onChange,
+  compact = false,
+}: {
+  language: Language;
+  onChange: (value: Language) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={`languageSwitch ${compact ? "compact" : ""}`}
+      aria-label="Language / Nyelv"
+    >
+      <button
+        className={language === "en" ? "active" : ""}
+        onClick={() => onChange("en")}
+      >
+        EN
+      </button>
+      <button
+        className={language === "hu" ? "active" : ""}
+        onClick={() => onChange("hu")}
+      >
+        HU
+      </button>
+    </div>
   );
 }
 function Area({
