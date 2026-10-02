@@ -1127,3 +1127,61 @@ header button,
     line-height: 1;
   }
 }
+
+/* ================================================================
+   JOKER-PANEL KOMPAKT MÉRETEZÉSE
+   ================================================================ */
+
+/*
+  A külső Joker-panel csak akkora legyen, amekkora a két egymás alatti
+  Joker ikonhoz ténylegesen szükséges. A korábbi min-width és a felső
+  állapotsor nyújtása miatt a keret indokolatlanul széles lehetett.
+*/
+.jokerPanel {
+  width: max-content;
+  min-width: 0;
+  height: max-content;
+  align-self: center;
+  justify-self: end;
+  padding: 4px;
+  gap: 0;
+  overflow: hidden;
+}
+
+/* A két Joker ikont egyetlen, keskeny függőleges oszlopba rendezi. */
+.jokerCards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+  gap: 0;
+}
+
+/*
+  Az ikon saját doboza nem kap külön kártyakeretet vagy felesleges szélességet.
+  A line-height 1 megakadályozza, hogy a böngésző extra függőleges helyet hagyjon.
+*/
+.jokerCard {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  background: transparent;
+}
+
+/* Az elhasznált Joker háttere sem szélesíti ki a külső panelt. */
+.jokerCard.used {
+  width: 48px;
+  height: 48px;
+  background: transparent;
+}
+
+@media (max-width: 800px) {
+  /* Mobilon még szorosabb belső térköz elegendő. */
+  .jokerPanel {
+    padding: 2px;
+  }
+}
