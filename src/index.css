@@ -248,10 +248,10 @@ header button,
   place-items: center;
   width: 54px;
   height: 78px;
-  font-size: 24px;
+  font-size: 72px;
   background: #fff;
-  border: 2px solid #cbd5e1;
-  border-radius: 10px;
+  /* border: 2px solid #cbd5e1;
+  border-radius: 10px; */
 }
 
 /* Az elhasznált Joker halvány helyőrzője. */
