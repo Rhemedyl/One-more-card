@@ -244,10 +244,10 @@ header button,
 
 /* Egy Joker small card méretű helye. */
 .jokerCard {
-  display: grid;
-  place-items: center;
+/*  display: grid;
+  place-items: center; 
   width: 54px;
-  height: 78px;
+  height: 78px; */
   font-size: 72px;
   background: #fff;
   /* border: 2px solid #cbd5e1;
