@@ -524,7 +524,7 @@ export default function App() {
           </h1>
           <p>{g.notice}</p>
         </div>
-        {/* A címsor jobb oldalán a rendezési könnyítés és az új játék gombja kap fix helyet. */}
+        {/* Jobb oldali fejlécműveletek: rendezési könnyítés és új játék. */}
         <div className="headerActions">
           <label className="sortToggle">
             <input
@@ -540,7 +540,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Kompakt felső állapotsor: három Morale-érték, a két pakli és a megmaradt Jokerek. */}
+      {/* Felső állapotsor: egy közös Morale-panel három sorral, mellette a paklik és Jokerek. */}
       <div className="topStatus">
         <div className="morales">
           <Stat
@@ -555,12 +555,12 @@ export default function App() {
           />
           <Stat title="Enemy Morale" value={g.enemyMorale} icon={<Swords />} />
         </div>
-        {/* A paklik kisebb kártyaméretű vizuális jelölést és lapszámlálót kapnak. */}
+        {/* Small card méretű Enemy Deck és Attack Deck. */}
         <div className="topDecks">
           <Stack n={g.enemyDeck.length} label="Enemy Deck" />
           <Stack n={g.attackDeck.length} label="Attack Deck" />
         </div>
-        {/* A Jokerek small card méretű üres kártyahelyeken jelennek meg. */}
+        {/* Két small card méretű Joker-hely; az elhasznált Joker szürkítve marad. */}
         <div className="jokerPanel">
           <small>Jokers</small>
           <div className="jokerCards">
@@ -576,14 +576,14 @@ export default function App() {
         </div>
       </div>
 
-      {/* A Current Enemy közvetlenül a fázissáv bal szélén jelenik meg. A második hely J&Q előtt is megmarad üresen. */}
+      {/* Első sor: Current Enemy balra, műveleti gombok jobbra. Második sor: fázisadatok. */}
       <section className={`phase ${g.phase.toLowerCase()}`}>
         <div className="phaseEnemy">
           {active && <CardView c={active} />}
           {queen ? (
             <CardView c={queen} />
           ) : (
-            <div className="card small enemyPlaceholder" />
+            <div className="enemyPlaceholder" />
           )}
         </div>
         <div className="phaseInfo">
@@ -600,9 +600,9 @@ export default function App() {
           )}
         </div>
         <div className="actions">
-          {/* A dinamikus Treff-opciók mindig a két fix húzási gomb elé kerülnek. */}
           {g.phase === "DRAWING" && (
             <>
+              {/* A dinamikus Treff-opciók mindig a két fix húzási gomb elé kerülnek. */}
               <div className="clubActions">
                 {battleClubs.map((c) => (
                   <button
@@ -622,7 +622,7 @@ export default function App() {
                   </button>
                 )}
               </div>
-              {/* Ez a két gomb fixen a fázissáv jobb szélén marad. */}
+              {/* A Draw card és Stop drawing fixen a jobb szélen marad. */}
               <div className="fixedDrawActions">
                 <button onClick={draw}>Draw card</button>
                 <button onClick={stop} disabled={!g.battleground.length}>
@@ -680,7 +680,7 @@ export default function App() {
                             ? "Select"
                             : ""}
                     </span>
-                    {/* Képernyőn kiskártyák, mobilon tömör szöveges lista látszik ugyanarról a tartalomról. */}
+                    {/* Képernyőn kiskártyák, mobilon tömör értéklista látszik. */}
                     <div className="legendCards">
                       {g.legends[s].length ? (
                         displayCards(g.legends[s]).map((c) => (
