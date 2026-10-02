@@ -163,7 +163,7 @@ const I18N = {
 type TKey = keyof typeof I18N.en;
 const template = (text: string, values: Record<string, string | number> = {}) =>
   Object.entries(values).reduce(
-    (r, [k, v]) => r.replaceAll(`{${k}}`, String(v)),
+    (result, [key, value]) => result.split(`{${key}}`).join(String(value)),
     text,
   );
 
