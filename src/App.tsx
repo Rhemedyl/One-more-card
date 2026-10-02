@@ -919,7 +919,7 @@ export default function App() {
         </div>
         {/* Két small card méretű Joker-hely; az elhasznált Joker szürkítve marad. */}
         <div className="jokerPanel">
-          <small>{t("jokers")}</small>
+         {/* <small>{t("jokers")}</small> */}
           <div className="jokerCards">
             {[0, 1].map((index) => (
               <div
