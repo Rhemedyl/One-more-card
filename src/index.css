@@ -238,8 +238,8 @@ header button,
 
 /* A két Joker egymás melletti sora. */
 .jokerCards {
-  display: flex;
-  gap: 6px;
+/*  display: flex;
+  gap: 6px;*/
 }
 
 /* Egy Joker small card méretű helye. */
