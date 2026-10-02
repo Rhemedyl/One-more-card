@@ -979,3 +979,13 @@ header button,
     flex-direction: column;
   }
 }
+
+/* A részletes támadáskiértékelési popup teljes szövege sötét,
+   hogy a világos háttéren minden számítás jól olvasható legyen. */
+.resolutionWalkthrough,
+.resolutionWalkthrough h2,
+.resolutionWalkthrough h3,
+.resolutionWalkthrough p,
+.resolutionWalkthrough strong {
+  color: #111827;
+}
