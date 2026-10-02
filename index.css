@@ -1,0 +1,1171 @@
+/* ================================================================
+   ALAPBEÁLLÍTÁSOK
+   ================================================================ */
+
+/* Minden elem méretébe beleszámítja a paddinget és a keretet. */
+* {
+  box-sizing: border-box;
+}
+
+/* Az oldal alap háttere, szövegszíne és betűtípusa. */
+body {
+  margin: 0;
+  background: #f4f0e4;
+  color: #10221d;
+  font-family: Inter, "Segoe UI", sans-serif;
+}
+
+/* A gombok az oldal betűtípusát használják. */
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* A tiltott gombok halványabbak, és nem mutatnak kattintható kurzort. */
+button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+/* A teljes alkalmazás maximális szélessége és oldalsó margója. */
+main {
+  max-width: 1500px;
+  margin: auto;
+  padding: 16px;
+}
+
+/* ================================================================
+   FEJLÉC
+   ================================================================ */
+
+/* Cím és állapotüzenet balra, rendezés és új játék jobbra. */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px #0001;
+}
+
+/* A játék főcíme. */
+header h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+}
+
+/* A nehézség- és szintjelvény közös megjelenése. */
+header h1 small,
+header h1 em {
+  margin-left: 6px;
+  padding: 5px;
+  font:
+    600 12px Inter,
+    sans-serif;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* Az ellenfélszint narancssárga jelvénye. */
+header h1 em {
+  color: #fff;
+  background: #d97706;
+  border: 0;
+}
+
+/* A cím alatti aktuális üzenet. */
+header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+/* A rendezési checkbox és a New game gomb közös tárolója. */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* A fejléc-, művelet- és elsődleges gombok közös alapstílusa. */
+header button,
+.actions button,
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1px solid #ccd3d0;
+  border-radius: 9px;
+}
+
+/* A fejlécben lévő rendezési kapcsoló. */
+.sortToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  white-space: nowrap;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+/* A checkbox kattintható mérete. */
+.sortToggle input {
+  width: 16px;
+  height: 16px;
+}
+
+/* ================================================================
+   FELSŐ ÁLLAPOTSOR
+   ================================================================ */
+
+/* Egy sorban helyezi el a Morale-panelt, a két paklit és a Jokereket. */
+.topStatus {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) auto auto;
+  align-items: stretch;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+/* A három Morale érték egyetlen közös kártyában, három egymás alatti sorban jelenik meg. */
+.morales {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  min-width: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+}
+
+/* Egy Morale-sor: felirat és érték balra, ikon jobbra. */
+.stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 12px;
+}
+
+/* A második és harmadik sort vékony elválasztó választja el. */
+.stat + .stat {
+  border-top: 1px solid #e5e7eb;
+}
+
+/* A Morale felirata. */
+.stat small {
+  display: inline;
+  margin-right: 8px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* A Morale számértéke. */
+.stat b {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* A két pakli közös fehér panelje. */
+.topDecks {
+  display: grid;
+  grid-template-columns: repeat(2, 64px);
+  gap: 8px;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+}
+
+/* Egy pakli hátlapjának és címének középre igazítása. */
+.stackBox {
+  text-align: center;
+}
+
+/* Small card méretű piros paklihátlap. */
+.stack {
+  position: relative;
+  width: 54px;
+  height: 78px;
+  margin: auto;
+  background: #dc2626;
+  border: 3px solid #7f1d1d;
+  border-radius: 10px;
+}
+
+/* A pakliban maradó lapok száma. */
+.stack span {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  padding: 3px 7px;
+  color: #fff;
+  background: #0f172a;
+  border-radius: 12px;
+}
+
+/* A pakli alatti felirat. */
+.stackBox small {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* A két Joker közös panelje. */
+.jokerPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 126px;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+}
+
+/* A két Joker egymás melletti sora. */
+.jokerCards {
+  display: flex;
+  gap: 6px;
+}
+
+/* Egy Joker small card méretű helye. */
+.jokerCard {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 78px;
+  font-size: 24px;
+  background: #fff;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+}
+
+/* Az elhasznált Joker halvány helyőrzője. */
+.jokerCard.used {
+  color: #94a3b8;
+  background: #f1f5f9;
+  opacity: 0.55;
+}
+
+/* ================================================================
+   CURRENT PHASE
+   ================================================================ */
+
+/*
+  Két oszlop és két sor:
+  - első sor: Current Enemy balra, műveletek jobbra;
+  - második sor: fázisnév, kártyaszám és Base Power teljes szélességben.
+*/
+.phase {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 12px 16px;
+  color: #fff;
+  background: #043d32;
+  border-radius: 16px;
+}
+
+/* Az aktív ellenfél és a J&Q második, fenntartott helye. */
+.phaseEnemy {
+  display: grid;
+  grid-column: 1;
+  grid-row: 1;
+  grid-template-columns: repeat(2, 54px);
+  gap: 6px;
+}
+
+/* A Q helye normál csatában ténylegesen üres, keret és háttér nélkül. */
+.enemyPlaceholder {
+  width: 54px;
+  height: 78px;
+}
+
+/* A fázisadatok a többi tartalom alatt, egy vízszintes sorban jelennek meg. */
+.phaseInfo {
+  display: flex;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* A fázis címét és adatait egy sorban tartja. */
+.phaseInfo small,
+.phaseInfo h2,
+.phaseInfo p {
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* A fázis neve kissé nagyobb marad. */
+.phaseInfo h2 {
+  font-size: 20px;
+}
+
+/* A Resolution fázis lila háttere. */
+.phase.resolution {
+  background: #3b0764;
+}
+
+/* A csata végét jelző barna háttér. */
+.phase.battle_end {
+  background: #78350f;
+}
+
+/* A játék végét jelző sötétpiros háttér. */
+.phase.game_over {
+  background: #7f1d1d;
+}
+
+/* A műveletek az első sor jobb oldalát használják. */
+.actions {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* A Treff-opciók a két fix húzásgomb előtt jelennek meg, és szükség esetén törhetnek. */
+.clubActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* A Draw card és Stop drawing együtt marad a jobb szélen. */
+.fixedDrawActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   JÁTÉKTÉR ÉS KÁRTYÁK
+   ================================================================ */
+
+/* A korábbi jobb oldali oldalsáv megszűnt, ezért egyetlen tartalmi oszlop marad. */
+.board {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Általános játékterület szaggatott kerettel. */
+.area {
+  margin-bottom: 14px;
+  padding: 12px;
+  background: #ffffffcc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+}
+
+/* A játékterületek címe. */
+.area h4 {
+  margin: 0 0 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* Képernyőn a négy Legend Area egy sorban marad. */
+.legendGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* Egy Legend Area alapstílusa. */
+.legend {
+  min-width: 0;
+  min-height: 116px;
+  padding: 10px;
+  text-align: left;
+  background: #f8fafc;
+  border: 2px solid #64748b;
+  border-radius: 14px;
+}
+
+/* A Legend Area neve és színszimbóluma. */
+.legend h3 {
+  display: inline;
+  margin: 0;
+}
+
+/* Used, Blocked vagy Select felirat. */
+.legend > span {
+  float: right;
+}
+
+/* Képernyőn kis kártyák, a rendelkezésre álló szélesség szerint tördelve. */
+.legendCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 54px);
+  align-items: start;
+  gap: 6px;
+  clear: both;
+  margin-top: 12px;
+}
+
+/* A mobilos szöveges összefoglaló képernyőn rejtve van. */
+.legendSummary {
+  display: none;
+}
+
+/* A blokkolt Legend Area szürke és áthúzott. */
+.legend.blocked {
+  text-decoration: line-through;
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+/* A kiválasztott Legend Area lila kiemelést kap. */
+.legend.selected {
+  outline: 4px solid #c4b5fd;
+}
+
+/* Általános, több kártyát egymás mellé és új sorba rendező tároló. */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 40px;
+}
+
+/* Minden kártya alapértelmezetten small card méretű. */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 54px;
+  height: 78px;
+  padding: 7px;
+  color: #111;
+  background: #fff;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+}
+
+/* Kompatibilitási osztály: ugyanaz a méret, mint az alap kártyánál. */
+.card.small {
+  width: 54px;
+  height: 78px;
+}
+
+/* A kártya középső színszimbóluma. */
+.card strong {
+  font-size: 23px;
+  text-align: center;
+}
+
+/* A jobb alsó érték fejjel lefelé jelenik meg. */
+.card b:last-child {
+  align-self: flex-end;
+  transform: rotate(180deg);
+}
+
+/* Az utoljára húzott lap sárga kiemelése. */
+.card.last {
+  outline: 4px solid #fbbf24;
+}
+
+/* Kőr és káró piros színe. */
+.card.red-card,
+.red-suit {
+  color: #dc2626;
+}
+
+/* Treff és pikk fekete színe. */
+.card.black-card,
+.black-suit {
+  color: #111827;
+}
+
+/* ================================================================
+   POPUPOK ÉS KEZDŐKÉPERNYŐ
+   ================================================================ */
+
+/* Teljes képernyős sötét popup-háttér. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #0008;
+}
+
+/* A popup fehér tartalmi doboza. */
+.modal {
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 70px #0005;
+}
+
+/* A popup címének nincs szüksége felső margóra. */
+.modal h2 {
+  margin-top: 0;
+}
+
+/* Elsődleges zöld gomb. */
+.primary {
+  color: #fff;
+  background: #166534;
+  border: 0;
+}
+
+/* Kezdőképernyő. */
+.menu {
+  padding-top: 70px;
+  text-align: center;
+}
+
+/* Kezdőképernyő nagy címe. */
+.menu h1 {
+  font:
+    700 52px Georgia,
+    serif;
+}
+
+/* Nehézségi opciók. */
+.difficulty {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  max-width: 800px;
+  margin: 30px auto;
+}
+
+/* Egy nehézségi gomb. */
+.difficulty button {
+  padding: 24px;
+  text-align: left;
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 15px;
+}
+
+/* Kezdő Morale a gomb jobb oldalán. */
+.difficulty button span {
+  float: right;
+}
+
+/* Kiválasztott nehézség. */
+.difficulty .chosen {
+  border-color: #166534;
+  outline: 4px solid #dcfce7;
+}
+
+/* ================================================================
+   MOBILNÉZET
+   ================================================================ */
+
+@media (max-width: 800px) {
+  /* Több hely marad a tartalomnak. */
+  main {
+    padding: 8px;
+  }
+
+  /* A fejléc tömörebb, de minden elem elérhető marad. */
+  header {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  /* Kisebb mobilos cím. */
+  header h1 {
+    font-size: 24px;
+  }
+
+  /* A címsor jobb oldali elemei tömörebbek. */
+  .headerActions {
+    gap: 6px;
+  }
+
+  .sortToggle {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  header button {
+    padding: 8px 10px;
+  }
+
+  /* A felső állapotsor mobilon is egy sorban marad. */
+  .topStatus {
+    grid-template-columns: 132px 136px 126px;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  /* A Morale-panel három egymás alatti, nagyon kompakt sora. */
+  .morales {
+    grid-template-rows: repeat(3, 1fr);
+  }
+
+  .stat {
+    padding: 4px 7px;
+  }
+
+  .stat small {
+    margin-right: 4px;
+    font-size: 9px;
+  }
+
+  .stat b {
+    font-size: 18px;
+  }
+
+  /* Current Enemy és műveletek felül, fázisadatok alattuk. Nincs vízszintes görgetés. */
+  .phase {
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 6px 8px;
+    overflow: visible;
+    padding: 8px;
+  }
+
+  /* A jobb oldali műveletek a rendelkezésre álló helyen több sorba törhetnek. */
+  .actions {
+    align-self: stretch;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .clubActions,
+  .fixedDrawActions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 5px;
+  }
+
+  /* Mobilon kisebb műveleti gombok. */
+  .actions button {
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+
+  /* Az alsó fázisadatok szükség esetén új sorba tördhetnek, de nem okoznak görgetést. */
+  .phaseInfo {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    font-size: 11px;
+  }
+
+  .phaseInfo h2 {
+    font-size: 15px;
+  }
+
+  /* Mind a négy Legend Area egy sorban marad. */
+  .legendGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  /* Mobilon a Legend Area kicsi, mert nincsenek benne kártyaképek. */
+  .legend {
+    min-height: 76px;
+    padding: 5px;
+    font-size: 9px;
+  }
+
+  .legend h3 {
+    display: block;
+    font-size: 10px;
+    line-height: 1.1;
+  }
+
+  .legend > span {
+    float: none;
+    display: block;
+    margin-top: 2px;
+    font-size: 8px;
+  }
+
+  /* A grafikus Legenda-kártyák mobilon rejtve vannak. */
+  .legendCards {
+    display: none;
+  }
+
+  /* Mobilon „3 cards: A, 3, 5” jellegű összefoglaló látszik. */
+  .legendSummary {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  /* Nehézségválasztás egy oszlopban. */
+  .difficulty {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ================================================================
+   KÉTNYELVŰ FELÜLET ÉS SZABÁLYKÖNYV
+   ================================================================ */
+.headerMain {
+  min-width: 0;
+}
+.headerButtonStack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.rulebookLink {
+  color: #166534;
+  font-weight: 600;
+  text-decoration: none;
+}
+.rulebookLink:hover,
+.rulebookLink:focus-visible {
+  text-decoration: underline;
+}
+.headerRulebookLink {
+  font-size: 12px;
+  text-align: center;
+}
+.menuRulebookLink {
+  display: block;
+  width: max-content;
+  margin: 14px auto 0;
+}
+.languageSwitch {
+  display: inline-flex;
+  width: max-content;
+  margin: 14px auto 0;
+  padding: 3px;
+  background: #e2e8f0;
+  border-radius: 9px;
+}
+.languageSwitch.compact {
+  margin: 0;
+}
+.languageSwitch button {
+  padding: 5px 8px;
+  color: #475569;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+}
+.languageSwitch button.active {
+  color: #fff;
+  background: #166534;
+}
+@media (max-width: 800px) {
+  header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .headerMain {
+    display: contents;
+  }
+  header h1 {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    font-size: 17px;
+    line-height: 1.15;
+  }
+  .headerActions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  header p {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin-top: 6px;
+  }
+  .languageSwitch.compact button {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+}
+
+/* Mobilos mini kártyák és kontrasztos Legend Area állapotok */
+.legend[aria-disabled="true"] {
+  color: #111827;
+  cursor: default;
+  opacity: 1;
+}
+.legend.inactive {
+  color: #111827;
+  background: #f8fafc;
+  border-color: #64748b;
+}
+.legend.available {
+  color: #111827;
+  background: #ecfdf5;
+  border-color: #34d399;
+}
+.legend.blocked {
+  color: #111827;
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  filter: none;
+  opacity: 1;
+  text-decoration: none;
+}
+.legend.blocked h3 {
+  color: #111827;
+  text-decoration: line-through;
+  opacity: 1;
+}
+.legend.used {
+  color: #111827;
+  background: #fff7ed;
+  border-color: #fb923c;
+  filter: none;
+  opacity: 1;
+}
+.legend.used h3 {
+  color: #111827;
+  font-style: italic;
+  transform: skew(-10deg);
+  transform-origin: left center;
+}
+.legend.used.blocked {
+  background: #f1e7dc;
+  border-color: #a8a29e;
+}
+@media (max-width: 800px) {
+  .legendCards,
+  .discardCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 15px);
+    gap: 2px;
+  }
+  .legendCards .card,
+  .legendCards .card.small,
+  .discardCards .card,
+  .discardCards .card.small {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 20px;
+    padding: 0;
+    font-size: 8px;
+    line-height: 0.8;
+    background: #fff;
+    border: 1px solid #64748b;
+    border-radius: 2px;
+  }
+  .legendCards .card b:first-child,
+  .discardCards .card b:first-child {
+    display: block;
+    font-size: 8px;
+    font-weight: 800;
+  }
+  .legendCards .card strong,
+  .discardCards .card strong {
+    display: block;
+    font-size: 6px;
+    line-height: 0.8;
+  }
+  .legendCards .card b:last-child,
+  .discardCards .card b:last-child {
+    display: none;
+  }
+}
+
+/* ================================================================
+   RÉSZLETES TÁMADÁSKIÉRTÉKELÉS
+   ================================================================ */
+
+/* A két fejléc-checkbox egymás alatt jelenik meg. */
+.headerToggles {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* A részletes kiértékelés tartalmi területe. */
+.resolutionWalkthrough {
+  display: grid;
+  gap: 12px;
+}
+
+/* Egy számítási lépés kártyaszerű megjelenése. */
+.resolutionStep {
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  animation: resolutionReveal 350ms ease-out both;
+}
+
+/* A lépés címe és sorai kompakt térközt használnak. */
+.resolutionStep h3 {
+  margin: 0 0 8px;
+}
+.resolutionStep p {
+  margin: 4px 0;
+}
+
+/* Az utolsó gomb és állapot egymás mellé kerül. */
+.resolutionComplete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  animation: resolutionReveal 350ms ease-out both;
+}
+
+/* A fokozatosan megjelenő lépések animációja. */
+@keyframes resolutionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 800px) {
+  /* Mobilon a két checkbox tömörebb, hogy a fejlécben maradjon. */
+  .headerToggles {
+    gap: 3px;
+  }
+  .headerToggles .sortToggle {
+    padding: 5px 7px;
+    font-size: 10px;
+  }
+
+  /* A részletes popup mobilon kisebb belső margót használ. */
+  .resolutionStep {
+    padding: 9px;
+    font-size: 13px;
+  }
+  .resolutionComplete {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+/* A részletes támadáskiértékelési popup teljes szövege sötét,
+   hogy a világos háttéren minden számítás jól olvasható legyen. */
+.resolutionWalkthrough,
+.resolutionWalkthrough h2,
+.resolutionWalkthrough h3,
+.resolutionWalkthrough p,
+.resolutionWalkthrough strong {
+  color: #111827;
+}
+
+/* A részletes kiértékelés Elfogadás gombja világos háttéren sötét feliratot használ. */
+.resolutionComplete .primary {
+  color: #111827;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+/* ================================================================
+   MOBILOS HEADER VÉGLEGES SORRENDJE
+   ================================================================ */
+
+@media (max-width: 800px) {
+  /*
+    A mobilos fejléc három soros rács:
+    1. sor: cím + nehézség + szint teljes szélességben;
+    2. sor: checkboxok, Új játék + Szabálykönyv, nyelvváltó;
+    3. sor: az utolsó játékesemény teljes szélességben.
+  */
+  header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto auto;
+    align-items: start;
+    gap: 7px 8px;
+  }
+
+  /* A headerMain gyermekei közvetlenül a header rácsában helyezkednek el. */
+  .headerMain {
+    display: contents;
+  }
+
+  /* Első sor: a teljes cím, nehézség és szint együtt, teljes szélességben. */
+  header h1 {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Második sor: a három vezérlőcsoport egymás mellett. */
+  .headerActions {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: start;
+    gap: 7px;
+    width: 100%;
+  }
+
+  /* A két checkbox bal oldalon, egymás alatt marad. */
+  .headerToggles {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  /* New game és Rulebook középen, egymás alatt. */
+  .headerButtonStack {
+    grid-column: 2;
+    min-width: max-content;
+  }
+
+  /* A nyelvváltó a második sor jobb szélén marad. */
+  .languageSwitch.compact {
+    grid-column: 3;
+    align-self: start;
+  }
+
+  /* Harmadik sor: az utolsó esemény teljes szélességben. */
+  header p {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    margin: 0;
+  }
+}
+
+/* ================================================================
+   KÁRTYAKINÉZET FINOMHANGOLÁSA
+   ================================================================ */
+
+/* A normál small kártyán a rang felül, a suit közvetlenül alatta jelenik meg. */
+.card {
+  justify-content: flex-start;
+  gap: 7px;
+}
+
+/* A suit a rang alatt, középre igazítva marad. */
+.card strong {
+  align-self: center;
+}
+
+@media (max-width: 800px) {
+  /*
+    A Legend Area és Discard Pile mini kártyái 21 × 28 pixelesek.
+    Ez pontosan megtartja a 3:4 szélesség-magasság arányt.
+  */
+  .legendCards,
+  .discardCards {
+    grid-template-columns: repeat(auto-fill, 21px);
+    gap: 3px;
+  }
+
+  /* A mini kártyán felül a rank, alatta a suit látható. */
+  .legendCards .card,
+  .legendCards .card.small,
+  .discardCards .card,
+  .discardCards .card.small {
+    width: 21px;
+    height: 28px;
+    padding: 1px 0 0;
+    gap: 1px;
+    font-size: 10px;
+    line-height: 1;
+    border-radius: 3px;
+  }
+
+  /* A rang marad az elsődleges információ. */
+  .legendCards .card b:first-child,
+  .discardCards .card b:first-child {
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  /* A suit kisebb méretben közvetlenül a rang alatt jelenik meg. */
+  .legendCards .card strong,
+  .discardCards .card strong {
+    display: block;
+    align-self: center;
+    font-size: 8px;
+    line-height: 1;
+  }
+}
+
+/* ================================================================
+   JOKER IKON ÉS JÁTÉKESEMÉNY-ÉRTESÍTÉSEK
+   ================================================================ */
+
+/* A felső Joker-kártyák közepén lévő ikon nagyobb és könnyebben felismerhető. */
+.jokerCard {
+  font-size: 38px;
+  line-height: 1;
+}
+
+/* Az újrakeverési és mentőangyal popup közös, középre rendezett tartalma. */
+.notificationPopup {
+  color: #111827;
+  text-align: center;
+}
+
+/* A popup fő vizuális ikonja. */
+.notificationIcon {
+  margin-bottom: 8px;
+  font-size: 48px;
+  line-height: 1;
+}
+
+/* A Jokerrel jelölt mentőangyal ikonja még hangsúlyosabb. */
+.notificationIcon.guardianIcon {
+  font-size: 56px;
+}
+
+/* Popup cím és szöveg biztosan sötét marad a világos háttéren. */
+.notificationPopup h2,
+.notificationPopup p {
+  color: #111827;
+}
+
+/* Az elfogadó gomb középre kerül. */
+.notificationPopup .primary {
+  margin: 12px auto 0;
+  color: #111827;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
