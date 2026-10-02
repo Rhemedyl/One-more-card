@@ -1129,59 +1129,68 @@ header button,
 }
 
 /* ================================================================
-   JOKER-PANEL KOMPAKT MÉRETEZÉSE
+   JOKEREK A PAKLIKÁRTYÁKKAL AZONOS MÉRETBEN
    ================================================================ */
 
 /*
-  A külső Joker-panel csak akkora legyen, amekkora a két egymás alatti
-  Joker ikonhoz ténylegesen szükséges. A korábbi min-width és a felső
-  állapotsor nyújtása miatt a keret indokolatlanul széles lehetett.
+  A Joker-panel szélessége a két egymás melletti, paklihátlap méretű Jokerhez igazodik.
+  A panel ugyanazt a belső térközt használja, mint a szomszédos paklipanel.
 */
 .jokerPanel {
-  width: max-content;
+  width: auto;
   min-width: 0;
-  height: max-content;
-  align-self: center;
-  justify-self: end;
-  padding: 4px;
-  gap: 0;
-  overflow: hidden;
+  height: auto;
+  align-self: stretch;
+  justify-self: auto;
+  padding: 6px 8px;
+  gap: 5px;
+  overflow: visible;
 }
 
-/* A két Joker ikont egyetlen, keskeny függőleges oszlopba rendezi. */
+/* A két Joker ismét egymás mellett, kis távolsággal jelenik meg. */
 .jokerCards {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  width: max-content;
-  gap: 0;
+  justify-content: center;
+  width: auto;
+  gap: 6px;
 }
 
 /*
-  Az ikon saját doboza nem kap külön kártyakeretet vagy felesleges szélességet.
-  A line-height 1 megakadályozza, hogy a böngésző extra függőleges helyet hagyjon.
+  Egy Joker pontosan akkora, mint a szomszédos Enemy Deck és Attack Deck hátlapja:
+  54 pixel széles és 78 pixel magas.
 */
-.jokerCard {
+.jokerCard,
+.jokerCard.used {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 78px;
   padding: 0;
   margin: 0;
+  font-size: 38px;
   line-height: 1;
-  background: transparent;
+  background: #fff;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
 }
 
-/* Az elhasznált Joker háttere sem szélesíti ki a külső panelt. */
+/* Az elhasznált Joker megtartja ugyanazt a méretet, csak vizuálisan halványabb. */
 .jokerCard.used {
-  width: 48px;
-  height: 48px;
-  background: transparent;
+  color: #94a3b8;
+  background: #f1f5f9;
+  opacity: 0.55;
 }
 
 @media (max-width: 800px) {
-  /* Mobilon még szorosabb belső térköz elegendő. */
+  /* Mobilon is ugyanaz a 54 × 78 pixeles méret és vízszintes elrendezés marad. */
   .jokerPanel {
-    padding: 2px;
+    padding: 6px 8px;
+  }
+
+  .jokerCards {
+    flex-direction: row;
+    gap: 6px;
   }
 }
