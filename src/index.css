@@ -1069,3 +1069,61 @@ header button,
     margin: 0;
   }
 }
+
+/* ================================================================
+   KÁRTYAKINÉZET FINOMHANGOLÁSA
+   ================================================================ */
+
+/* A normál small kártyán a rang felül, a suit közvetlenül alatta jelenik meg. */
+.card {
+  justify-content: flex-start;
+  gap: 7px;
+}
+
+/* A suit a rang alatt, középre igazítva marad. */
+.card strong {
+  align-self: center;
+}
+
+@media (max-width: 800px) {
+  /*
+    A Legend Area és Discard Pile mini kártyái 21 × 28 pixelesek.
+    Ez pontosan megtartja a 3:4 szélesség-magasság arányt.
+  */
+  .legendCards,
+  .discardCards {
+    grid-template-columns: repeat(auto-fill, 21px);
+    gap: 3px;
+  }
+
+  /* A mini kártyán felül a rank, alatta a suit látható. */
+  .legendCards .card,
+  .legendCards .card.small,
+  .discardCards .card,
+  .discardCards .card.small {
+    width: 21px;
+    height: 28px;
+    padding: 1px 0 0;
+    gap: 1px;
+    font-size: 10px;
+    line-height: 1;
+    border-radius: 3px;
+  }
+
+  /* A rang marad az elsődleges információ. */
+  .legendCards .card b:first-child,
+  .discardCards .card b:first-child {
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  /* A suit kisebb méretben közvetlenül a rang alatt jelenik meg. */
+  .legendCards .card strong,
+  .discardCards .card strong {
+    display: block;
+    align-self: center;
+    font-size: 8px;
+    line-height: 1;
+  }
+}

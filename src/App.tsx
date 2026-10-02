@@ -345,9 +345,9 @@ function CardView({
       onClick={onClick}
       disabled={!onClick}
     >
+      {/* A kártyán csak a felső rang és az alatta lévő suit látszik. */}
       <b>{c.rank}</b>
       <strong>{META[c.suit].s}</strong>
-      <b>{c.rank}</b>
     </button>
   );
 }
