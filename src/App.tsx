@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Heart, Shield, Swords, RotateCcw } from "lucide-react";
 
 type Language = "en" | "hu";
@@ -20,6 +20,30 @@ type Summary = {
   counter: number;
   joker: boolean;
 };
+type ResolutionPreview = {
+  cardValues: number[];
+  base: number;
+  strength: number;
+  heartCount: number;
+  heartBattle: number;
+  heartLegend: number;
+  moraleBefore: number;
+  moraleAfterHealing: number;
+  spadeCount: number;
+  spadeBattle: number;
+  spadeLegend: number;
+  totalPower: number;
+  enemyBefore: number;
+  enemyAfter: number;
+  lastValue: number;
+  enemyLevel: number;
+  rawCounter: number;
+  diamondCount: number;
+  diamondBattle: number;
+  diamondLegend: number;
+  finalCounter: number;
+};
+
 type Game = {
   phase: Phase;
   difficulty: Difficulty;
@@ -71,6 +95,7 @@ const I18N = {
     currentPhase: "Current phase",
     cards: "Cards",
     basePower: "Base Power",
+    total: "Total Power",
     draw: "Draw card",
     stop: "Stop drawing",
     useClub: "Use {rank}♣",
@@ -102,6 +127,25 @@ const I18N = {
     clubWarn: "Use Club at 1 Morale?",
     clubWarnText: "A Joker will be spent immediately if available.",
     continue: "Continue",
+    fastResolution: "Fast attack resolution",
+    resolutionTitle: "Attack Resolution",
+    healingStep: "1. Healing",
+    powerStep: "2. Total Power",
+    counterStep: "3. Counterattack",
+    resultStep: "Calculation complete",
+    battlegroundBonus: "Battleground bonus",
+    legendBonus: "Legend Area bonus",
+    moraleChange: "Morale",
+    enemyMoraleChange: "Enemy Morale",
+    rawCounter: "Raw counterattack",
+    finalCounter: "Final counterattack",
+    cardSum: "Sum of cards",
+    applyResolution: "Apply resolution",
+    empty: "Empty",
+    clubsName: "Clubs",
+    diamondsName: "Diamonds",
+    heartsName: "Hearts",
+    spadesName: "Spades",
     used: "used",
     no: "no",
   },
@@ -126,6 +170,7 @@ const I18N = {
     currentPhase: "Aktuális fázis",
     cards: "Lapok",
     basePower: "Alaperő",
+    total: "Összerő",
     draw: "Laphúzás",
     stop: "Megállás",
     useClub: "{rank}♣ használata",
@@ -156,6 +201,25 @@ const I18N = {
     clubWarn: "Treff használata 1 Morálnál?",
     clubWarnText: "Ha van elérhető Joker, azonnal felhasználódik.",
     continue: "Folytatás",
+    fastResolution: "Gyors támadáskiértékelés",
+    resolutionTitle: "Támadás kiértékelése",
+    healingStep: "1. Gyógyulás",
+    powerStep: "2. Összerő",
+    counterStep: "3. Visszatámadás",
+    resultStep: "A számítás elkészült",
+    battlegroundBonus: "Csatatér bónusz",
+    legendBonus: "Legenda-terület bónusz",
+    moraleChange: "Morál",
+    enemyMoraleChange: "Ellenfél Morálja",
+    rawCounter: "Nyers visszatámadás",
+    finalCounter: "Végső visszatámadás",
+    cardSum: "Lapok összege",
+    applyResolution: "Kiértékelés alkalmazása",
+    empty: "Üres",
+    clubsName: "Treff",
+    diamondsName: "Káró",
+    heartsName: "Kőr",
+    spadesName: "Pikk",
     used: "felhasználva",
     no: "nem",
   },
@@ -163,7 +227,7 @@ const I18N = {
 type TKey = keyof typeof I18N.en;
 const template = (text: string, values: Record<string, string | number> = {}) =>
   Object.entries(values).reduce(
-    (result, [key, value]) => result.split(`{${key}}`).join(String(value)),
+    (r, [k, v]) => r.split(`{${k}}`).join(String(v)),
     text,
   );
 
@@ -374,6 +438,25 @@ export default function App() {
   const [clubWarn, setClubWarn] = useState<string | null>(null);
   const [sortCards, setSortCards] = useState(false);
   const [drawWarn, setDrawWarn] = useState(false);
+  const [fastResolution, setFastResolution] = useState(() =>
+    localStorage.getItem("one-more-card-fast-resolution") === "true",
+  );
+  const [resolutionPreview, setResolutionPreview] = useState<ResolutionPreview | null>(null);
+  const [resolutionStep, setResolutionStep] = useState(0);
+  const changeFastResolution = (value: boolean) => {
+    localStorage.setItem("one-more-card-fast-resolution", String(value));
+    setFastResolution(value);
+  };
+  const suitName = (suit: Suit) =>
+    suit === "clubs" ? t("clubsName") :
+    suit === "diamonds" ? t("diamondsName") :
+    suit === "hearts" ? t("heartsName") : t("spadesName");
+
+  useEffect(() => {
+    if (!resolutionPreview || resolutionStep >= 3) return;
+    const timer = window.setTimeout(() => setResolutionStep((step) => step + 1), 650);
+    return () => window.clearTimeout(timer);
+  }, [resolutionPreview, resolutionStep]);
   const active = g?.currentEnemy[0],
     queen = g?.queenEnemy[0];
   const activeSuits = useMemo(
@@ -401,7 +484,7 @@ export default function App() {
           ))}
         </div>
         <button className="primary" onClick={() => setG(fresh(difficulty))}>
-          Start {difficulty} Game
+          {t("start", { difficulty: difficultyName(difficulty) })}
         </button>
         <a
           className="rulebookLink menuRulebookLink"
@@ -536,7 +619,59 @@ export default function App() {
         c,
       ),
     );
+  const createResolutionPreview = (): ResolutionPreview | null => {
+    const last = g.battleground.find((c) => c.id === g.last);
+    if (!last) return null;
+    const strength = g.battleground.length;
+    const count = (suit: Suit) => g.battleground.filter((c) => c.suit === suit).length;
+    const base = g.duplicate ? 0 : g.battleground.reduce((sum, card) => sum + card.value, 0);
+    const heartCount = count("hearts");
+    const heartBattle = blocked("hearts") ? 0 : heartCount * strength;
+    const heartLegend = g.selected.hearts ? g.legends.hearts.length : 0;
+    const spadeCount = count("spades");
+    const spadeBattle = blocked("spades") ? 0 : spadeCount * strength;
+    const spadeLegend = g.selected.spades ? g.legends.spades.length : 0;
+    const diamondCount = count("diamonds");
+    const diamondBattle = blocked("diamonds") ? 0 : diamondCount * strength;
+    const diamondLegend = g.selected.diamonds ? g.legends.diamonds.length : 0;
+    const rawCounter = last.value + g.enemyLevel;
+    return {
+      cardValues: g.battleground.map((card) => card.value),
+      base,
+      strength,
+      heartCount,
+      heartBattle,
+      heartLegend,
+      moraleBefore: g.currentMorale,
+      moraleAfterHealing: Math.min(g.maximumMorale, g.currentMorale + heartBattle + heartLegend),
+      spadeCount,
+      spadeBattle,
+      spadeLegend,
+      totalPower: base + spadeBattle + spadeLegend,
+      enemyBefore: g.enemyMorale,
+      enemyAfter: g.enemyMorale - base - spadeBattle - spadeLegend,
+      lastValue: last.value,
+      enemyLevel: g.enemyLevel,
+      rawCounter,
+      diamondCount,
+      diamondBattle,
+      diamondLegend,
+      finalCounter: Math.max(0, rawCounter - diamondBattle - diamondLegend),
+    };
+  };
+
   const resolve = () => {
+    if (fastResolution) {
+      applyResolution();
+      return;
+    }
+    const preview = createResolutionPreview();
+    if (!preview) return;
+    setResolutionStep(0);
+    setResolutionPreview(preview);
+  };
+
+  const applyResolution = () => {
     const last = g.battleground.find((c) => c.id === g.last);
     if (!last) return;
     const strength = g.battleground.length,
@@ -714,7 +849,7 @@ export default function App() {
       <header>
         <div className="headerMain">
           <h1>
-            One More Card?! <small>{g.difficulty}</small>{" "}
+            One More Card?! <small>{difficultyName(g.difficulty)}</small>{" "}
             <em>
               {t("level")} {g.enemyLevel}
             </em>
@@ -723,14 +858,24 @@ export default function App() {
         </div>
         {/* Jobb oldali fejlécműveletek: rendezési könnyítés és új játék. */}
         <div className="headerActions">
-          <label className="sortToggle">
-            <input
-              type="checkbox"
-              checked={sortCards}
-              onChange={(e) => setSortCards(e.target.checked)}
-            />
-            Sort cards by value
-          </label>
+          <div className="headerToggles">
+            <label className="sortToggle">
+              <input
+                type="checkbox"
+                checked={sortCards}
+                onChange={(e) => setSortCards(e.target.checked)}
+              />
+              {t("sort")}
+            </label>
+            <label className="sortToggle">
+              <input
+                type="checkbox"
+                checked={fastResolution}
+                onChange={(e) => changeFastResolution(e.target.checked)}
+              />
+              {t("fastResolution")}
+            </label>
+          </div>
           <div className="headerButtonStack">
             <button onClick={() => setReset(true)}>
               <RotateCcw /> {t("newGame")}
@@ -832,7 +977,7 @@ export default function App() {
                     disabled={blocked("clubs", true)}
                     onClick={() => askClub("legend")}
                   >
-                    Use Club Legend
+                    {t("useClubLegend")}
                   </button>
                 )}
               </div>
@@ -840,7 +985,7 @@ export default function App() {
               <div className="fixedDrawActions">
                 <button onClick={draw}>{t("draw")}</button>
                 <button onClick={stop} disabled={!g.battleground.length}>
-                  Stop drawing
+                  {t("stop")}
                 </button>
               </div>
             </>
@@ -848,7 +993,72 @@ export default function App() {
           {g.phase === "RESOLUTION" && (
             <button onClick={resolve}>{t("resolve")}</button>
           )}
-          {g.phase === "BATTLE_END" && (
+          {resolutionPreview && (
+        <Modal>
+          <div className="resolutionWalkthrough">
+            <h2>{t("resolutionTitle")}</h2>
+
+            <section className="resolutionStep visible">
+              <h3>{t("healingStep")}</h3>
+              <p>
+                ♥ {t("battlegroundBonus")}: {resolutionPreview.heartCount} × {resolutionPreview.strength} = {resolutionPreview.heartBattle}
+              </p>
+              <p>♥ {t("legendBonus")}: +{resolutionPreview.heartLegend}</p>
+              <strong>
+                {t("moraleChange")}: {resolutionPreview.moraleBefore} → {resolutionPreview.moraleAfterHealing}
+              </strong>
+            </section>
+
+            {resolutionStep >= 1 && (
+              <section className="resolutionStep visible">
+                <h3>{t("powerStep")}</h3>
+                <p>
+                  {t("cardSum")}: {resolutionPreview.cardValues.join(" + ")} = {resolutionPreview.base}
+                </p>
+                <p>♠ {t("battlegroundBonus")}: +{resolutionPreview.spadeBattle}</p>
+                <p>♠ {t("legendBonus")}: +{resolutionPreview.spadeLegend}</p>
+                <strong>
+                  {t("total")}: {resolutionPreview.base} + {resolutionPreview.spadeBattle} + {resolutionPreview.spadeLegend} = {resolutionPreview.totalPower}
+                </strong>
+                <p>
+                  {t("enemyMoraleChange")}: {resolutionPreview.enemyBefore} → {resolutionPreview.enemyAfter}
+                </p>
+              </section>
+            )}
+
+            {resolutionStep >= 2 && (
+              <section className="resolutionStep visible">
+                <h3>{t("counterStep")}</h3>
+                <p>
+                  {t("rawCounter")}: {resolutionPreview.lastValue} + {resolutionPreview.enemyLevel} = {resolutionPreview.rawCounter}
+                </p>
+                <p>♦ {t("battlegroundBonus")}: −{resolutionPreview.diamondBattle}</p>
+                <p>♦ {t("legendBonus")}: −{resolutionPreview.diamondLegend}</p>
+                <strong>
+                  {t("finalCounter")}: {resolutionPreview.rawCounter} − {resolutionPreview.diamondBattle} − {resolutionPreview.diamondLegend} = {resolutionPreview.finalCounter}
+                </strong>
+              </section>
+            )}
+
+            {resolutionStep >= 3 && (
+              <div className="resolutionComplete">
+                <strong>{t("resultStep")}</strong>
+                <button
+                  className="primary"
+                  onClick={() => {
+                    setResolutionPreview(null);
+                    applyResolution();
+                  }}
+                >
+                  {t("applyResolution")}
+                </button>
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
+
+      {g.phase === "BATTLE_END" && (
             <button onClick={nextBattle}>{t("continueCampaign")}</button>
           )}
         </div>
@@ -883,7 +1093,7 @@ export default function App() {
                           : "black-suit"
                       }
                     >
-                      {META[s].s} {META[s].n}
+                      {META[s].s} {suitName(s)}
                     </h3>
                     {/* Képernyőn kiskártyák, mobilon tömör értéklista látszik. */}
                     <div className="legendCards">
@@ -892,7 +1102,7 @@ export default function App() {
                           <CardView key={c.id} c={c} />
                         ))
                       ) : (
-                        <span>Empty</span>
+                        <span>{t("empty")}</span>
                       )}
                     </div>
                   </button>
