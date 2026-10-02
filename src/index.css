@@ -229,8 +229,8 @@ header button,
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-width: 126px;
-  padding: 6px 8px;
+  min-width: 66px;
+/*  padding: 6px 8px;*/
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 14px;
@@ -248,7 +248,7 @@ header button,
   place-items: center; 
   width: 54px;
   height: 78px; */
-  font-size: 72px;
+  font-size: 48px;
   background: #fff;
   /* border: 2px solid #cbd5e1;
   border-radius: 10px; */
