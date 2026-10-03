@@ -110,6 +110,12 @@ const I18N = {
     available:
       "{selected} of {available} available Legend Areas were activated",
     congratulations: "Congratulations!",
+    maxMoraleReward: "Maximum Morale reward: +{amount}",
+    guardianTitle: "The guardian angel arrived!",
+    guardianText: "Your Morale fell below 1, but a Joker saved the army and restored its Morale to the maximum.",
+    reshuffleTitle: "Attack Deck reshuffled",
+    reshuffleText: "The Attack Deck was empty, so the Discard Pile was shuffled into a new Attack Deck.",
+    understood: "Got it",
     defeated:
       "You defeated the {rank}s. The defeated cards have joined your side.",
     finish: "Finish campaign",
@@ -184,6 +190,12 @@ const I18N = {
     lastResolution: "Előző kiértékelés",
     available: "{selected}/{available} elérhető Legenda-terület aktiválva",
     congratulations: "Gratulálok!",
+    maxMoraleReward: "Maximális Morál jutalom: +{amount}",
+    guardianTitle: "Megérkezett a mentőangyal!",
+    guardianText: "A Morálod 1 alá csökkent, de egy Joker megmentette a seregedet, és maximumra töltötte a Morált.",
+    reshuffleTitle: "A Támadópakli újrakeverve",
+    reshuffleText: "A Támadópakli elfogyott, ezért a Dobópakli lapjaiból új Támadópakli készült.",
+    understood: "Rendben",
     defeated:
       "Legyőzted a(z) {rank} értékű ellenfeleket. A lapok most hozzád álltak.",
     finish: "Kampány befejezése",
@@ -438,6 +450,8 @@ export default function App() {
   const [clubWarn, setClubWarn] = useState<string | null>(null);
   const [sortCards, setSortCards] = useState(false);
   const [drawWarn, setDrawWarn] = useState(false);
+  const [guardianNotice, setGuardianNotice] = useState(false);
+  const [reshuffleNotice, setReshuffleNotice] = useState(false);
   const [fastResolution, setFastResolution] = useState(() =>
     localStorage.getItem("one-more-card-fast-resolution") === "true",
   );
@@ -527,6 +541,7 @@ export default function App() {
         ] as const;
       y.attackDeck = shuffle(y.discard);
       y.discard = [];
+      setReshuffleNotice(true);
       if (y.difficulty !== "Hard")
         y.currentMorale = Math.min(
           y.maximumMorale,
@@ -575,7 +590,8 @@ export default function App() {
       legendUsed:
         source === "legend" ? { ...g.legendUsed, clubs: true } : g.legendUsed,
     };
-    const [m, lost] = loseMorale(x, 1);
+    const [m, lost, joker] = loseMorale(x, 1);
+    if (joker) setGuardianNotice(true);
     if (lost)
       return setG({
         ...m,
@@ -691,8 +707,9 @@ export default function App() {
       currentMorale: Math.min(g.maximumMorale, g.currentMorale + heart + lh),
       enemyMorale,
     };
-    const [m, lost, joker] = loseMorale(x, counter),
-      summary = {
+    const [m, lost, joker] = loseMorale(x, counter);
+    if (joker) setGuardianNotice(true);
+    const summary = {
         base,
         spade: spade + ls,
         total: base + spade + ls,
@@ -929,7 +946,6 @@ export default function App() {
               </div>
             ))}
           </div>
-          {/* A felirat a paklikhoz hasonlóan a két Joker alatt jelenik meg. */}
           <small className="jokerLabel">{t("jokers")}</small>
         </div>
       </div>
@@ -1072,12 +1088,11 @@ export default function App() {
                 const isEmpty = g.legends[s].length === 0;
                 const isUsed = g.legendUsed[s];
                 const isBlocked = blocked(s, true);
+                const potentiallyUsable = Boolean(
+                  s !== "clubs" && !isEmpty && !isUsed && !isBlocked,
+                );
                 const selectable = Boolean(
-                  g.phase === "RESOLUTION" &&
-                    s !== "clubs" &&
-                    !isEmpty &&
-                    !isUsed &&
-                    !isBlocked,
+                  g.phase === "RESOLUTION" && potentiallyUsable,
                 );
                 const legendState = isEmpty
                   ? "empty"
@@ -1085,12 +1100,12 @@ export default function App() {
                     ? "used"
                     : isBlocked
                       ? "blocked"
-                      : selectable
+                      : potentiallyUsable
                         ? "available"
                         : "inactive";
                 return (
                   <button
-                    className={`legend ${legendState} ${g.selected[s] ? "selected" : ""}`}
+                    className={`legend ${legendState} ${g.phase === "RESOLUTION" && !selectable ? "resolutionDisabled" : ""} ${g.selected[s] ? "selected" : ""}`}
                     aria-disabled={!selectable}
                     tabIndex={selectable ? 0 : -1}
                     onClick={
@@ -1171,6 +1186,9 @@ export default function App() {
         <Modal>
           <h2>{t("congratulations")}</h2>
           <p>{t("defeated", { rank: g.enemyRank })}</p>
+          <p className="moraleReward">
+            {t("maxMoraleReward", { amount: g.enemyLevel })}
+          </p>
           <button className="primary" onClick={nextBattle}>
             {g.enemyRank === "K" ? t("finish") : t("continueCampaign")}
           </button>
@@ -1201,6 +1219,30 @@ export default function App() {
               </button>
             ))}
             <button onClick={() => setReset(false)}>{t("cancel")}</button>
+          </div>
+        </Modal>
+      )}
+      {reshuffleNotice && (
+        <Modal>
+          <div className="notificationPopup">
+            <div className="notificationIcon">🔀</div>
+            <h2>{t("reshuffleTitle")}</h2>
+            <p>{t("reshuffleText")}</p>
+            <button className="primary" onClick={() => setReshuffleNotice(false)}>
+              {t("understood")}
+            </button>
+          </div>
+        </Modal>
+      )}
+      {guardianNotice && (
+        <Modal>
+          <div className="notificationPopup">
+            <div className="notificationIcon guardianIcon">🃏</div>
+            <h2>{t("guardianTitle")}</h2>
+            <p>{t("guardianText")}</p>
+            <button className="primary" onClick={() => setGuardianNotice(false)}>
+              {t("understood")}
+            </button>
           </div>
         </Modal>
       )}

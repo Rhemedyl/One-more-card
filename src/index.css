@@ -1129,59 +1129,49 @@ header button,
 }
 
 /* ================================================================
-   JOKER-BLOKK ÉS LEGEND AREA ÁLLAPOTOK JAVÍTÁSA
+   JOKER ELRENDEZÉS, LEGEND ÁLLAPOTOK ÉS ÚJ POPUPOK
    ================================================================ */
 
-/*
-  A Joker-panel pontos, kiszámítható méretű területet kap.
-  A két 54 px széles Joker, a köztük lévő 6 px rés és a kétoldali 8 px padding
-  együtt 130 px szélességet igényel. A magasság a figurák és az alsó felirat
-  számára 104 px.
-*/
+/* A panel szűkebb, így képernyőn és mobilon sem lóg ki a felső állapotsorból. */
 .jokerPanel {
   display: grid;
-  grid-template-rows: 78px auto;
+  grid-template-rows: 70px auto;
   place-items: center;
-  width: 130px;
-  min-width: 130px;
-  max-width: 130px;
-  height: 104px;
-  min-height: 104px;
-  padding: 6px 8px 5px;
-  gap: 3px;
+  width: 104px;
+  min-width: 104px;
+  max-width: 104px;
+  height: 94px;
+  min-height: 94px;
+  padding: 4px;
+  gap: 2px;
   overflow: hidden;
 }
 
-/* A két Joker egymás mellett, pontosan meghatározott szélességű helyeken áll. */
+/* A Jokerek közötti és bal oldali felesleges távolság minimalizálva. */
 .jokerCards {
   display: grid;
-  grid-template-columns: repeat(2, 54px);
-  align-items: center;
-  justify-content: center;
-  width: 114px;
-  height: 78px;
-  gap: 6px;
+  grid-template-columns: repeat(2, 46px);
+  width: 94px;
+  height: 70px;
+  gap: 2px;
+  place-items: center;
   overflow: hidden;
 }
 
-/*
-  Maga a Joker figura tölti ki az 54 × 78 px területet.
-  Nincs külön belső kártyakeret. Az overflow megakadályozza, hogy a nagy emoji
-  kimásszon a számára fenntartott dobozból.
-*/
+/* A Joker figura pontosan meghatározott területen belül marad. */
 .jokerCard,
 .jokerCard.used {
   display: grid;
   place-items: center;
-  width: 54px;
-  min-width: 54px;
-  max-width: 54px;
-  height: 78px;
-  min-height: 78px;
-  max-height: 78px;
+  width: 46px;
+  min-width: 46px;
+  max-width: 46px;
+  height: 70px;
+  min-height: 70px;
+  max-height: 70px;
   padding: 0;
   margin: 0;
-  font-size: 54px;
+  font-size: 46px;
   line-height: 1;
   background: transparent;
   border: 0;
@@ -1189,55 +1179,40 @@ header button,
   overflow: hidden;
 }
 
-/* Elhasznált Joker esetén az X ugyanabban a fix méretű területben marad. */
+/* Az X ugyanabban a területben marad. */
 .jokerCard.used {
   color: #64748b;
-  font-size: 44px;
+  font-size: 38px;
   opacity: 0.65;
 }
 
-/* A felirat a deckekhez hasonlóan a figurák alatt, középen jelenik meg. */
+/* A Jokers/Jokerek felirat a két figura alatt jelenik meg. */
 .jokerLabel {
   display: block;
   width: 100%;
   margin: 0;
   color: #64748b;
   font-size: 10px;
-  line-height: 1.1;
+  line-height: 1;
   text-align: center;
   white-space: nowrap;
 }
 
-/* Inaktív Legend Area nem halványul el automatikusan. */
-.legend[aria-disabled="true"] {
-  color: #111827;
-  cursor: default;
-  opacity: 1;
-}
-
-/* Üres terület: fehér háttér. */
+/* Üres Legend Area: fehér. */
 .legend.empty {
   color: #111827;
-  background: #ffffff;
+  background: #fff;
   border-color: #cbd5e1;
 }
 
-/* Még nem használható, de nem blokkolt és nem használt terület: semleges háttér. */
-.legend.inactive {
-  color: #111827;
-  background: #f8fafc;
-  border-color: #64748b;
-}
-
-/* Jelenleg aktiválható terület: világoszöld háttér. */
+/* Húzás közben is látható, hogy a terület később használható lesz. */
 .legend.available {
   color: #111827;
   background: #dcfce7;
   border-color: #22c55e;
-  cursor: pointer;
 }
 
-/* Blokkolt terület: középszürke háttér. */
+/* Blokkolt Legend Area: középszürke háttér. */
 .legend.blocked {
   color: #111827;
   background: #d1d5db;
@@ -1247,14 +1222,7 @@ header button,
   text-decoration: none;
 }
 
-/* Csak a blokkolt terület címe húzódik át. */
-.legend.blocked h3 {
-  color: #111827;
-  text-decoration: line-through;
-  opacity: 1;
-}
-
-/* Már használt terület: a blokkolttól eltérő, hidegebb sötétszürke háttér. */
+/* Használt Legend Area: a blokkolttól eltérő, hidegebb világosszürke. */
 .legend.used {
   color: #111827;
   background: #e2e8f0;
@@ -1263,35 +1231,66 @@ header button,
   opacity: 1;
 }
 
-/* Csak a használt terület címe dőlt. */
-.legend.used h3 {
-  color: #111827;
-  font-style: italic;
-  transform: skew(-10deg);
-  transform-origin: left center;
+/* Resolution alatt a nem kattintható területek csak szürke keretet kapnak;
+   az állapotot jelző háttérszínük változatlan marad. */
+.legend.resolutionDisabled {
+  border-color: #9ca3af;
+  cursor: default;
 }
 
-/* A kiválasztott, még használható terület megtartja a lila kijelölést. */
-.legend.selected {
-  background: #ede9fe;
-  border-color: #8b5cf6;
-  outline: 4px solid #c4b5fd;
+/* A kattintható terület továbbra is egyértelműen zöld keretű. */
+.legend.available:not(.resolutionDisabled) {
+  cursor: pointer;
+}
+
+/* Maximális Morál jutalom kiemelése. */
+.moraleReward {
+  padding: 9px 12px;
+  color: #14532d;
+  font-weight: 700;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 9px;
+}
+
+/* Újrakeverési és mentőangyal popup. */
+.notificationPopup {
+  color: #111827;
+  text-align: center;
+}
+.notificationIcon {
+  margin-bottom: 8px;
+  font-size: 48px;
+  line-height: 1;
+}
+.notificationIcon.guardianIcon {
+  font-size: 56px;
+}
+.notificationPopup h2,
+.notificationPopup p {
+  color: #111827;
+}
+.notificationPopup .primary {
+  margin: 12px auto 0;
+  color: #111827;
+  background: #dcfce7;
+  border: 1px solid #86efac;
 }
 
 @media (max-width: 800px) {
-  /* Mobilon is megtartjuk a pontos méreteket, így semmi nem mászik ki a panelből. */
+  /* Mobilon ugyanaz a kompakt, fix méretű Joker-panel marad. */
   .jokerPanel {
-    width: 130px;
-    min-width: 130px;
-    max-width: 130px;
-    height: 104px;
-    padding: 6px 8px 5px;
+    width: 104px;
+    min-width: 104px;
+    max-width: 104px;
+    height: 94px;
+    padding: 4px;
   }
 
   .jokerCards {
-    grid-template-columns: repeat(2, 54px);
-    width: 114px;
-    height: 78px;
-    gap: 6px;
+    grid-template-columns: repeat(2, 46px);
+    width: 94px;
+    height: 70px;
+    gap: 2px;
   }
 }
