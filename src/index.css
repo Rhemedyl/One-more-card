@@ -1129,27 +1129,134 @@ header button,
 }
 
 /* ================================================================
-   VISSZATÁMADÁS UTÁNI MORÁL ÉS ÚJRAKEVERÉSI JUTALOM
+   JOKER ELRENDEZÉS, LEGEND ÁLLAPOTOK ÉS ÚJ POPUPOK
    ================================================================ */
 
-/* A visszatámadás utáni tényleges Morál-változás a többi számítással azonos stílusú. */
-.moraleAfterCounter {
-  margin-top: 8px !important;
-  padding-top: 8px;
-  color: #111827;
-  font-weight: 700;
-  border-top: 1px solid #cbd5e1;
+/* A panel szűkebb, így képernyőn és mobilon sem lóg ki a felső állapotsorból. */
+.jokerPanel {
+  display: grid;
+  grid-template-rows: 70px auto;
+  place-items: center;
+  width: 104px;
+  min-width: 104px;
+  max-width: 104px;
+  height: 94px;
+  min-height: 94px;
+  padding: 4px;
+  gap: 2px;
+  overflow: hidden;
 }
 
-/* Az értesítő popupok teljes tartalma sötét marad a világos háttéren. */
+/* A Jokerek közötti és bal oldali felesleges távolság minimalizálva. */
+.jokerCards {
+  display: grid;
+  grid-template-columns: repeat(2, 46px);
+  width: 94px;
+  height: 70px;
+  gap: 2px;
+  place-items: center;
+  overflow: hidden;
+}
+
+/* A Joker figura pontosan meghatározott területen belül marad. */
+.jokerCard,
+.jokerCard.used {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  min-width: 46px;
+  max-width: 46px;
+  height: 70px;
+  min-height: 70px;
+  max-height: 70px;
+  padding: 0;
+  margin: 0;
+  font-size: 46px;
+  line-height: 1;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* Az X ugyanabban a területben marad. */
+.jokerCard.used {
+  color: #64748b;
+  font-size: 38px;
+  opacity: 0.65;
+}
+
+/* A Jokers/Jokerek felirat a két figura alatt jelenik meg. */
+.jokerLabel {
+  display: block;
+  width: 100%;
+  margin: 0;
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Üres Legend Area: fehér. */
+.legend.empty {
+  color: #111827;
+  background: #fff;
+  border-color: #cbd5e1;
+}
+
+/* Húzás közben is látható, hogy a terület később használható lesz. */
+.legend.available {
+  color: #111827;
+  background: #dcfce7;
+  border-color: #22c55e;
+}
+
+/* Blokkolt Legend Area: középszürke háttér. */
+.legend.blocked {
+  color: #111827;
+  background: #d1d5db;
+  border-color: #6b7280;
+  filter: none;
+  opacity: 1;
+  text-decoration: none;
+}
+
+/* Használt Legend Area: a blokkolttól eltérő, hidegebb világosszürke. */
+.legend.used {
+  color: #111827;
+  background: #e2e8f0;
+  border-color: #475569;
+  filter: none;
+  opacity: 1;
+}
+
+/* Resolution alatt a nem kattintható területek csak szürke keretet kapnak;
+   az állapotot jelző háttérszínük változatlan marad. */
+.legend.resolutionDisabled {
+  border-color: #9ca3af;
+  cursor: default;
+}
+
+/* A kattintható terület továbbra is egyértelműen zöld keretű. */
+.legend.available:not(.resolutionDisabled) {
+  cursor: pointer;
+}
+
+/* Maximális Morál jutalom kiemelése. */
+.moraleReward {
+  padding: 9px 12px;
+  color: #14532d;
+  font-weight: 700;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 9px;
+}
+
+/* Újrakeverési és mentőangyal popup. */
 .notificationPopup {
   color: #111827;
   text-align: center;
-}
-.notificationPopup h2,
-.notificationPopup p,
-.notificationPopup strong {
-  color: #111827;
 }
 .notificationIcon {
   margin-bottom: 8px;
@@ -1159,6 +1266,10 @@ header button,
 .notificationIcon.guardianIcon {
   font-size: 56px;
 }
+.notificationPopup h2,
+.notificationPopup p {
+  color: #111827;
+}
 .notificationPopup .primary {
   margin: 12px auto 0;
   color: #111827;
@@ -1166,12 +1277,37 @@ header button,
   border: 1px solid #86efac;
 }
 
-/* A Morál-jutalom külön zöld kiemelést kap. */
-.moraleReward {
-  padding: 9px 12px;
-  color: #14532d !important;
+@media (max-width: 800px) {
+  /* Mobilon ugyanaz a kompakt, fix méretű Joker-panel marad. */
+  .jokerPanel {
+    width: 104px;
+    min-width: 104px;
+    max-width: 104px;
+    height: 94px;
+    padding: 4px;
+  }
+
+  .jokerCards {
+    grid-template-columns: repeat(2, 46px);
+    width: 94px;
+    height: 70px;
+    gap: 2px;
+  }
+}
+/* ================================================================
+   LEGUTÓBBI KÉT KIEGÉSZÍTÉS
+   ================================================================ */
+
+/* A visszatámadás után megmaradó Morál a számítás végén külön sorban látszik. */
+.moraleAfterCounter {
+  margin-top: 8px !important;
+  padding-top: 8px;
+  color: #111827;
   font-weight: 700;
-  background: #dcfce7;
-  border: 1px solid #86efac;
-  border-radius: 9px;
+  border-top: 1px solid #cbd5e1;
+}
+
+/* Az újrakeveréskor kapott tényleges Morál-jutalom zöld kiemelést kap. */
+.notificationPopup .moraleReward {
+  color: #14532d;
 }

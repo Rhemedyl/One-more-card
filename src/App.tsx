@@ -111,6 +111,12 @@ const I18N = {
     available:
       "{selected} of {available} available Legend Areas were activated",
     congratulations: "Congratulations!",
+    maxMoraleReward: "Maximum Morale reward: +{amount}",
+    guardianTitle: "The guardian angel arrived!",
+    guardianText: "Your Morale fell below 1, but a Joker saved the army and restored its Morale to the maximum.",
+    reshuffleTitle: "Attack Deck reshuffled",
+    reshuffleText: "The Attack Deck was empty, so the Discard Pile was shuffled into a new Attack Deck.",
+    understood: "Got it",
     defeated:
       "You defeated the {rank}s. The defeated cards have joined your side.",
     finish: "Finish campaign",
@@ -141,13 +147,7 @@ const I18N = {
     rawCounter: "Raw counterattack",
     finalCounter: "Final counterattack",
     currentMoraleAfterCounter: "Current Morale after counterattack",
-    reshuffleTitle: "Attack Deck reshuffled",
-    reshuffleText: "The Attack Deck was empty, so the Discard Pile was shuffled into a new Attack Deck.",
     reshuffleMorale: "Current Morale reward: +{amount}",
-    guardianTitle: "The guardian angel arrived!",
-    guardianText: "Your Morale fell below 1, but a Joker saved the army and restored its Morale to the maximum.",
-    understood: "Got it",
-    maxMoraleReward: "Maximum Morale reward: +{amount}",
     cardSum: "Sum of cards",
     applyResolution: "Accept",
     empty: "Empty",
@@ -193,6 +193,12 @@ const I18N = {
     lastResolution: "Előző kiértékelés",
     available: "{selected}/{available} elérhető Legenda-terület aktiválva",
     congratulations: "Gratulálok!",
+    maxMoraleReward: "Maximális Morál jutalom: +{amount}",
+    guardianTitle: "Megérkezett a mentőangyal!",
+    guardianText: "A Morálod 1 alá csökkent, de egy Joker megmentette a seregedet, és maximumra töltötte a Morált.",
+    reshuffleTitle: "A Támadópakli újrakeverve",
+    reshuffleText: "A Támadópakli elfogyott, ezért a Dobópakli lapjaiból új Támadópakli készült.",
+    understood: "Rendben",
     defeated:
       "Legyőzted a(z) {rank} értékű ellenfeleket. A lapok most hozzád álltak.",
     finish: "Kampány befejezése",
@@ -223,13 +229,7 @@ const I18N = {
     rawCounter: "Nyers visszatámadás",
     finalCounter: "Végső visszatámadás",
     currentMoraleAfterCounter: "Aktuális Morál a visszatámadás után",
-    reshuffleTitle: "A Támadópakli újrakeverve",
-    reshuffleText: "A Támadópakli elfogyott, ezért a Dobópakli lapjaiból új Támadópakli készült.",
     reshuffleMorale: "Aktuális Morál jutalom: +{amount}",
-    guardianTitle: "Megérkezett a mentőangyal!",
-    guardianText: "A Morálod 1 alá csökkent, de egy Joker megmentette a seregedet, és maximumra töltötte a Morált.",
-    understood: "Rendben",
-    maxMoraleReward: "Maximális Morál jutalom: +{amount}",
     cardSum: "Lapok összege",
     applyResolution: "Elfogadás",
     empty: "Üres",
@@ -455,8 +455,8 @@ export default function App() {
   const [clubWarn, setClubWarn] = useState<string | null>(null);
   const [sortCards, setSortCards] = useState(false);
   const [drawWarn, setDrawWarn] = useState(false);
-  const [reshuffleReward, setReshuffleReward] = useState<number | null>(null);
   const [guardianNotice, setGuardianNotice] = useState(false);
+  const [reshuffleReward, setReshuffleReward] = useState<number | null>(null);
   const [fastResolution, setFastResolution] = useState(() =>
     localStorage.getItem("one-more-card-fast-resolution") === "true",
   );
@@ -680,8 +680,10 @@ export default function App() {
       diamondLegend,
       finalCounter: Math.max(0, rawCounter - diamondBattle - diamondLegend),
       moraleAfterCounter:
-        Math.min(g.maximumMorale, g.currentMorale + heartBattle + heartLegend) -
-        Math.max(0, rawCounter - diamondBattle - diamondLegend),
+        Math.min(
+          g.maximumMorale,
+          g.currentMorale + heartBattle + heartLegend,
+        ) - Math.max(0, rawCounter - diamondBattle - diamondLegend),
     };
   };
 
@@ -945,7 +947,6 @@ export default function App() {
         </div>
         {/* Két small card méretű Joker-hely; az elhasznált Joker szürkítve marad. */}
         <div className="jokerPanel">
-         {/* <small>{t("jokers")}</small> */}
           <div className="jokerCards">
             {[0, 1].map((index) => (
               <div
@@ -956,6 +957,7 @@ export default function App() {
               </div>
             ))}
           </div>
+          <small className="jokerLabel">{t("jokers")}</small>
         </div>
       </div>
 
@@ -1097,22 +1099,37 @@ export default function App() {
           <Area title={t("legends")}>
             <div className="legendGrid">
               {SUITS.map((s) => {
-                const b = blocked(s, true),
-                  selectable =
-                    g.phase === "RESOLUTION" &&
-                    s !== "clubs" &&
-                    g.legends[s].length &&
-                    !g.legendUsed[s] &&
-                    !b;
+                const isEmpty = g.legends[s].length === 0;
+                const isUsed = g.legendUsed[s];
+                const isBlocked = blocked(s, true);
+                const potentiallyUsable = Boolean(
+                  s !== "clubs" && !isEmpty && !isUsed && !isBlocked,
+                );
+                const selectable = Boolean(
+                  g.phase === "RESOLUTION" && potentiallyUsable,
+                );
+                const legendState = isEmpty
+                  ? "empty"
+                  : isUsed
+                    ? "used"
+                    : isBlocked
+                      ? "blocked"
+                      : potentiallyUsable
+                        ? "available"
+                        : "inactive";
                 return (
                   <button
-                    className={`legend ${b ? "blocked" : ""} ${g.selected[s] ? "selected" : ""}`}
+                    className={`legend ${legendState} ${g.phase === "RESOLUTION" && !selectable ? "resolutionDisabled" : ""} ${g.selected[s] ? "selected" : ""}`}
                     aria-disabled={!selectable}
-                    onClick={() =>
-                      setG({
-                        ...g,
-                        selected: { ...g.selected, [s]: !g.selected[s] },
-                      })
+                    tabIndex={selectable ? 0 : -1}
+                    onClick={
+                      selectable
+                        ? () =>
+                            setG({
+                              ...g,
+                              selected: { ...g.selected, [s]: !g.selected[s] },
+                            })
+                        : undefined
                     }
                   >
                     <h3
