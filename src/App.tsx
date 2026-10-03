@@ -919,7 +919,6 @@ export default function App() {
         </div>
         {/* Két small card méretű Joker-hely; az elhasznált Joker szürkítve marad. */}
         <div className="jokerPanel">
-         {/* <small>{t("jokers")}</small> */}
           <div className="jokerCards">
             {[0, 1].map((index) => (
               <div
@@ -930,6 +929,8 @@ export default function App() {
               </div>
             ))}
           </div>
+          {/* A felirat a paklikhoz hasonlóan a két Joker alatt jelenik meg. */}
+          <small className="jokerLabel">{t("jokers")}</small>
         </div>
       </div>
 
@@ -1068,22 +1069,38 @@ export default function App() {
           <Area title={t("legends")}>
             <div className="legendGrid">
               {SUITS.map((s) => {
-                const b = blocked(s, true),
-                  selectable =
-                    g.phase === "RESOLUTION" &&
+                const isEmpty = g.legends[s].length === 0;
+                const isUsed = g.legendUsed[s];
+                const isBlocked = blocked(s, true);
+                const selectable = Boolean(
+                  g.phase === "RESOLUTION" &&
                     s !== "clubs" &&
-                    g.legends[s].length &&
-                    !g.legendUsed[s] &&
-                    !b;
+                    !isEmpty &&
+                    !isUsed &&
+                    !isBlocked,
+                );
+                const legendState = isEmpty
+                  ? "empty"
+                  : isUsed
+                    ? "used"
+                    : isBlocked
+                      ? "blocked"
+                      : selectable
+                        ? "available"
+                        : "inactive";
                 return (
                   <button
-                    className={`legend ${b ? "blocked" : ""} ${g.selected[s] ? "selected" : ""}`}
+                    className={`legend ${legendState} ${g.selected[s] ? "selected" : ""}`}
                     aria-disabled={!selectable}
-                    onClick={() =>
-                      setG({
-                        ...g,
-                        selected: { ...g.selected, [s]: !g.selected[s] },
-                      })
+                    tabIndex={selectable ? 0 : -1}
+                    onClick={
+                      selectable
+                        ? () =>
+                            setG({
+                              ...g,
+                              selected: { ...g.selected, [s]: !g.selected[s] },
+                            })
+                        : undefined
                     }
                   >
                     <h3
