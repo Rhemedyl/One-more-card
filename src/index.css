@@ -1311,3 +1311,87 @@ header button,
 .notificationPopup .moraleReward {
   color: #14532d;
 }
+
+/* ================================================================
+   QUICK REFERENCE / GYORSSEGÉDLET
+   ================================================================ */
+.quickReference {
+  margin-top: 18px;
+  padding: 16px;
+  color: #1f2937;
+  background: #fffdf7;
+  border: 1px solid #d6cdbb;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #0000000c;
+}
+.quickReference > h2 {
+  margin: 0 0 12px;
+  color: #365b48;
+  font-family: Georgia, serif;
+}
+.quickReferenceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.quickReference article {
+  padding: 12px;
+  background: #f8f6ef;
+  border: 1px solid #ded8ca;
+  border-radius: 11px;
+}
+.quickReference h3 {
+  margin: 0 0 6px;
+  color: #365b48;
+  font-size: 15px;
+}
+.quickReference p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.42;
+}
+.quickEnemyTable,
+.quickDifficultyTable {
+  display: grid;
+  gap: 3px;
+}
+.quickEnemyRow,
+.quickDifficultyRow {
+  display: grid;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  background: #fff;
+  border-radius: 5px;
+}
+.quickEnemyRow {
+  grid-template-columns: 28px minmax(52px, 1fr) 42px;
+  text-align: center;
+}
+.quickDifficultyRow {
+  grid-template-columns: 62px 30px minmax(0, 1fr);
+  font-size: 12px;
+}
+@media (max-width: 800px) {
+  .quickReference {
+    margin-top: 10px;
+    padding: 10px;
+  }
+  .quickReference > h2 {
+    font-size: 20px;
+  }
+  .quickReferenceGrid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .quickReference article {
+    padding: 9px;
+  }
+  .quickReference h3 {
+    font-size: 14px;
+  }
+  .quickReference p,
+  .quickDifficultyRow {
+    font-size: 11px;
+  }
+}
