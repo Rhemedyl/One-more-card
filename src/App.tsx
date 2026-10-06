@@ -72,8 +72,10 @@ type Game = {
   summary: Summary | null;
   victory: boolean;
 };
-const RULEBOOK_URL =
-  "https://drive.google.com/file/d/1E3ozP6v9BC3FDe7qAlg0YvCEZMPaB_CR/view";
+const RULEBOOK_URLS: Record<Language, string> = {
+  en: "https://drive.google.com/file/d/1E3ozP6v9BC3FDe7qAlg0YvCEZMPaB_CR/view",
+  hu: "https://drive.google.com/file/d/1s_oYUD-hHhSBBZNQHPoSAM3hzTyqIopv/view?usp=drive_link",
+};
 const I18N = {
   en: {
     subtitle: "Interactive campaign prototype",
@@ -181,8 +183,8 @@ const I18N = {
     hard: "Nehéz",
     morale: "Morál",
     start: "{difficulty} játék indítása",
-    rulebook: "Szabálykönyv (angol)",
-    readRules: "Szabálykönyv megnyitása (angol)",
+    rulebook: "Szabálykönyv",
+    readRules: "Szabálykönyv megnyitása",
     newGame: "Új játék",
     sort: "Lapok rendezése érték szerint",
     level: "Szint",
@@ -539,7 +541,7 @@ export default function App() {
         </button>
         <a
           className="rulebookLink menuRulebookLink"
-          href={RULEBOOK_URL}
+          href={RULEBOOK_URLS[language]}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -948,7 +950,7 @@ export default function App() {
             </button>
             <a
               className="rulebookLink headerRulebookLink"
-              href={RULEBOOK_URL}
+              href={RULEBOOK_URLS[language]}
               target="_blank"
               rel="noopener noreferrer"
             >
