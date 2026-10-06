@@ -157,6 +157,22 @@ const I18N = {
     spadesName: "Spades",
     used: "used",
     no: "no",
+    blockedBonus: "{label} blocked: 0",
+    quickReference: "Quick Reference",
+    quickAttackRound: "Attack Round",
+    quickAttackRoundText: "Draw or use the ♣ ability until you stop. Apply ♥ before the Counterattack. Base Power is the sum of card values, or 0 after a duplicate. Counterattack equals the last card value plus Enemy Level. Apply ♠ to Total Power and ♦ to the Counterattack. The last card becomes a Legend; all other Battleground cards go to the Discard Pile.",
+    quickSuits: "Suits",
+    quickSuitsText: "Ability Strength: Battleground = cards on the Battleground; Legend Area = cards in the matching Legend Area. ♠ increases Total Power by X. ♦ reduces the Counterattack by X. ♥ restores X Morale before the Counterattack. ♣ costs 1 Morale and lets you choose 1 of X + 1 cards. The active enemy suit blocks the matching ability; on Easy, Legend abilities are not blocked.",
+    quickPreparation: "Battle Preparation",
+    quickPreparationText: "Take the top four cards of the Enemy Deck to form the Current Enemy pile, then set Enemy Morale according to the Enemy Table.",
+    quickVictory: "Battle Victory",
+    quickVictoryText: "Increase Maximum Morale and Current Morale by the defeated Enemy Level. Add all four defeated enemy cards to the Discard Pile, refresh Legend abilities, then prepare the next battle. After defeating the King, the game ends instead.",
+    quickReshuffle: "Reshuffle",
+    quickReshuffleText: "If the Attack Deck is empty when you must draw, shuffle the Discard Pile into a new Attack Deck. Recover Current Morale equal to the current Enemy Level, up to Maximum Morale, except on Hard. If both piles are empty, you lose.",
+    quickJoker: "Joker",
+    quickJokerText: "If Current Morale falls below 1, spend a Joker and restore Current Morale to Maximum Morale. If no Joker remains, you lose.",
+    quickEnemyTable: "Enemy Table",
+    quickDifficulty: "Difficulty",
   },
   hu: {
     subtitle: "Interaktív kampányprototípus",
@@ -239,6 +255,22 @@ const I18N = {
     spadesName: "Pikk",
     used: "felhasználva",
     no: "nem",
+    blockedBonus: "{label} blokkolva: 0",
+    quickReference: "Gyorssegédlet",
+    quickAttackRound: "Támadási kör",
+    quickAttackRoundText: "Húzz, vagy használd a ♣ képességet, amíg meg nem állsz. A ♥ a Visszatámadás előtt növeli az Aktuális Morált. Az Alaperő a lapértékek összege, duplikációnál 0. A Visszatámadás az utolsó lap értéke plusz az Ellenség szintje. A ♠ az Összerőt növeli, a ♦ a Visszatámadást csökkenti. Az utolsó lap Legendává válik, a többi Csatatér-lap a Dobópakliba kerül.",
+    quickSuits: "Színek",
+    quickSuitsText: "Képességerő: Csatatér = a Csatatéren lévő lapok száma; Legenda-terület = az adott területen lévő lapok száma. ♠ +X Összerő. ♦ −X Visszatámadás. ♥ +X Morál a Visszatámadás előtt. ♣ 1 Morálért X + 1 lapból választhatsz egyet. Az aktív ellenségszín blokkolja az azonos képességet; Könnyű módban a Legendákat nem blokkolja.",
+    quickPreparation: "Csata előkészítése",
+    quickPreparationText: "Az Ellenségpakli felső négy lapjából készítsd el az Aktuális Ellenség pakliját, majd állítsd be az Ellenfél Morálját az Ellenségtáblázat alapján.",
+    quickVictory: "Csatagyőzelem",
+    quickVictoryText: "Növeld a Maximális és az Aktuális Morált a legyőzött Ellenség szintjével. Tedd mind a négy legyőzött ellenséglapot a Dobópakliba, frissítsd a Legenda-képességeket, majd készítsd elő a következő csatát. A Király legyőzése után a játék véget ér.",
+    quickReshuffle: "Újrakeverés",
+    quickReshuffleText: "Ha húznod kell, de a Támadópakli üres, keverd a Dobópaklit új Támadópaklivá. Növeld az Aktuális Morált az aktuális Ellenség szintjével, legfeljebb a Maximális Morálig, kivéve Nehéz módban. Ha mindkét pakli üres, elveszíted a játékot.",
+    quickJoker: "Joker",
+    quickJokerText: "Ha az Aktuális Morál 1 alá csökken, használj el egy Jokert, majd állítsd az Aktuális Morált a Maximális Morál értékére. Ha nincs több Jokered, elveszíted a játékot.",
+    quickEnemyTable: "Ellenségtábla",
+    quickDifficulty: "Nehézség",
   },
 } as const;
 type TKey = keyof typeof I18N.en;
@@ -761,12 +793,20 @@ export default function App() {
       usedClubs: [],
       summary,
     };
-    if (enemyMorale <= 0)
+    if (enemyMorale <= 0) {
+      if (g.enemyRank === "K")
+        return setG({
+          ...clean,
+          phase: "GAME_OVER",
+          victory: true,
+          notice: "You defeated the King.",
+        });
       return setG({
         ...clean,
         phase: "BATTLE_END",
         notice: "Enemy defeated. The final counterattack was survived.",
       });
+    }
     let ce = [...clean.currentEnemy.slice(1), clean.currentEnemy[0]],
       qe = clean.queenEnemy.length
         ? [...clean.queenEnemy.slice(1), clean.queenEnemy[0]]
@@ -783,17 +823,15 @@ export default function App() {
     });
   };
   const nextBattle = () => {
-    const max = g.maximumMorale + g.enemyLevel,
-      cur = Math.min(max, g.currentMorale + g.enemyLevel);
     if (g.enemyRank === "K")
       return setG({
         ...g,
-        maximumMorale: max,
-        currentMorale: cur,
         phase: "GAME_OVER",
         victory: true,
         notice: "You defeated the King.",
       });
+    const max = g.maximumMorale + g.enemyLevel,
+      cur = Math.min(max, g.currentMorale + g.enemyLevel);
     let ed = [...g.enemyDeck],
       common = {
         maximumMorale: max,
@@ -1029,7 +1067,9 @@ export default function App() {
             <section className="resolutionStep visible">
               <h3>{t("healingStep")}</h3>
               <p>
-                ♥ {t("battlegroundBonus")}: {resolutionPreview.heartCount} × {resolutionPreview.strength} = {resolutionPreview.heartBattle}
+                {blocked("hearts")
+                  ? `♥ ${t("blockedBonus", { label: t("battlegroundBonus") })}`
+                  : `♥ ${t("battlegroundBonus")}: ${resolutionPreview.heartCount} × ${resolutionPreview.strength} = ${resolutionPreview.heartBattle}`}
               </p>
               <p>♥ {t("legendBonus")}: +{resolutionPreview.heartLegend}</p>
               <strong>
@@ -1043,7 +1083,11 @@ export default function App() {
                 <p>
                   {t("cardSum")}: {resolutionPreview.cardValues.join(" + ")} = {resolutionPreview.base}
                 </p>
-                <p>♠ {t("battlegroundBonus")}: +{resolutionPreview.spadeBattle}</p>
+                <p>
+                  {blocked("spades")
+                    ? `♠ ${t("blockedBonus", { label: t("battlegroundBonus") })}`
+                    : `♠ ${t("battlegroundBonus")}: +${resolutionPreview.spadeBattle}`}
+                </p>
                 <p>♠ {t("legendBonus")}: +{resolutionPreview.spadeLegend}</p>
                 <strong>
                   {t("total")}: {resolutionPreview.base} + {resolutionPreview.spadeBattle} + {resolutionPreview.spadeLegend} = {resolutionPreview.totalPower}
@@ -1060,7 +1104,11 @@ export default function App() {
                 <p>
                   {t("rawCounter")}: {resolutionPreview.lastValue} + {resolutionPreview.enemyLevel} = {resolutionPreview.rawCounter}
                 </p>
-                <p>♦ {t("battlegroundBonus")}: −{resolutionPreview.diamondBattle}</p>
+                <p>
+                  {blocked("diamonds")
+                    ? `♦ ${t("blockedBonus", { label: t("battlegroundBonus") })}`
+                    : `♦ ${t("battlegroundBonus")}: −${resolutionPreview.diamondBattle}`}
+                </p>
                 <p>♦ {t("legendBonus")}: −{resolutionPreview.diamondLegend}</p>
                 <strong>
                   {t("finalCounter")}: {resolutionPreview.rawCounter} − {resolutionPreview.diamondBattle} − {resolutionPreview.diamondLegend} = {resolutionPreview.finalCounter}
@@ -1196,13 +1244,18 @@ export default function App() {
           */}
         </div>
       </div>
+      <QuickReference language={language} t={t} />
       {g.phase === "BATTLE_END" && (
         <Modal>
           <h2>{t("congratulations")}</h2>
-          <p>{t("defeated", { rank: g.enemyRank })}</p>
-          <p className="moraleReward">
-            {t("maxMoraleReward", { amount: g.enemyLevel })}
-          </p>
+          {g.enemyRank !== "K" && (
+            <>
+              <p>{t("defeated", { rank: g.enemyRank })}</p>
+              <p className="moraleReward">
+                {t("maxMoraleReward", { amount: g.enemyLevel })}
+              </p>
+            </>
+          )}
           <button className="primary" onClick={nextBattle}>
             {g.enemyRank === "K" ? t("finish") : t("continueCampaign")}
           </button>
@@ -1306,6 +1359,61 @@ export default function App() {
     </main>
   );
 }
+function QuickReference({
+  language,
+  t,
+}: {
+  language: Language;
+  t: (key: TKey, values?: Record<string, string | number>) => string;
+}) {
+  const enemies = [
+    ["1", "5", "10"],
+    ["2", "6", "15"],
+    ["3", "7", "21"],
+    ["4", "8", "28"],
+    ["5", "9", "35"],
+    ["6", "10", "45"],
+    ["7", language === "hu" ? "B & D" : "J & Q", "60"],
+    ["8", language === "hu" ? "Király" : "King", "100"],
+  ];
+  const difficulties = language === "hu"
+    ? [["Nehéz", "20", "Nincs Morálnövelés újrakeveréskor"], ["Normál", "25", "Nincs"], ["Könnyű", "30", "Az ellenségszín nem blokkolja a Legendákat"]]
+    : [["Hard", "20", "No Morale recovery after reshuffling"], ["Normal", "25", "None"], ["Easy", "30", "Enemy suits do not block Legends"]];
+  return (
+    <section className="quickReference" aria-labelledby="quick-reference-title">
+      <h2 id="quick-reference-title">{t("quickReference")}</h2>
+      <div className="quickReferenceGrid">
+        <article><h3>{t("quickAttackRound")}</h3><p>{t("quickAttackRoundText")}</p></article>
+        <article><h3>{t("quickSuits")}</h3><p>{t("quickSuitsText")}</p></article>
+        <article><h3>{t("quickPreparation")}</h3><p>{t("quickPreparationText")}</p></article>
+        <article><h3>{t("quickVictory")}</h3><p>{t("quickVictoryText")}</p></article>
+        <article><h3>{t("quickReshuffle")}</h3><p>{t("quickReshuffleText")}</p></article>
+        <article><h3>{t("quickJoker")}</h3><p>{t("quickJokerText")}</p></article>
+        <article className="quickTableCard">
+          <h3>{t("quickEnemyTable")}</h3>
+          <div className="quickEnemyTable" role="table">
+            {enemies.map(([level, rank, morale]) => (
+              <div className="quickEnemyRow" role="row" key={level}>
+                <b>{level}</b><span>{rank}</span><span>{morale}</span>
+              </div>
+            ))}
+          </div>
+        </article>
+        <article className="quickTableCard">
+          <h3>{t("quickDifficulty")}</h3>
+          <div className="quickDifficultyTable" role="table">
+            {difficulties.map(([name, morale, rule]) => (
+              <div className="quickDifficultyRow" role="row" key={name}>
+                <b>{name}</b><span>{morale}</span><span>{rule}</span>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function LanguageSwitch({
   language,
   onChange,
