@@ -1018,6 +1018,16 @@ export default function App() {
             </p>
           )}
         </div>
+        {g.phase === "CLUB_SELECTION" && (
+          <div className="phaseClubSelection" aria-label={t("clubSelection")}>
+            <small>{t("clubSelection")}</small>
+            <div className="phaseClubSelectionCards">
+              {g.clubSelection.map((c) => (
+                <CardView key={c.id} c={c} onClick={() => chooseClub(c)} />
+              ))}
+            </div>
+          </div>
+        )}
         <div className="actions">
           {g.phase === "DRAWING" && (
             <>
@@ -1205,15 +1215,6 @@ export default function App() {
               ))}
             </div>
           </Area>
-          {g.phase === "CLUB_SELECTION" && (
-            <Area title={t("clubSelection")}>
-              <div className="cards">
-                {g.clubSelection.map((c) => (
-                  <CardView c={c} onClick={() => chooseClub(c)} />
-                ))}
-              </div>
-            </Area>
-          )}
           <Area title={t("discard")}>
             <div className="cards discardCards">
               {displayCards(g.discard).map((c) => (
@@ -1240,6 +1241,56 @@ export default function App() {
       </div>
       <QuickReference language={language} t={t} />
       <style>{`
+        .phaseClubSelection {
+          align-self: stretch;
+          display: grid;
+          align-content: center;
+          min-width: 210px;
+          max-width: min(46vw, 520px);
+          margin: 8px 10px 8px auto;
+          padding: 8px 10px;
+          color: #fff;
+          background: rgba(255, 255, 255, 0.12);
+          border: 2px dashed rgba(255, 255, 255, 0.62);
+          border-radius: 12px;
+        }
+        .phaseClubSelection > small {
+          display: block;
+          margin-bottom: 6px;
+          color: rgba(255, 255, 255, 0.9);
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+        .phaseClubSelectionCards {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 7px;
+          overflow-x: auto;
+          padding: 2px 1px 4px;
+          scrollbar-width: thin;
+        }
+        .phaseClubSelectionCards .card {
+          flex: 0 0 auto;
+          margin: 0;
+        }
+        @media (max-width: 800px) {
+          .phase.club_selection {
+            flex-wrap: wrap;
+          }
+          .phaseClubSelection {
+            order: 3;
+            width: calc(100% - 16px);
+            min-width: 0;
+            max-width: none;
+            margin: 4px 8px 8px;
+            padding: 8px;
+          }
+          .phaseClubSelectionCards {
+            justify-content: flex-start;
+          }
+        }
         .attackDeckInspectSlot {
           position: relative; display: grid; justify-items: center;
         }
