@@ -1240,9 +1240,13 @@ export default function App() {
       </div>
       <QuickReference language={language} t={t} />
       <style>{`
-        .attackDeckInspectSlot { position: relative; display: grid; justify-items: center; }
+        .attackDeckInspectSlot {
+          position: relative; display: grid; justify-items: center;
+          padding-bottom: 18px;
+        }
         .attackDeckInspectButton {
-          position: absolute; top: -5px; right: -7px; z-index: 2;
+          position: absolute; left: 50%; bottom: -18px; z-index: 2;
+          transform: translateX(-50%);
           width: 24px; height: 24px; padding: 0; border-radius: 999px;
           color: #fff; background: #365b48; border: 2px solid #fff;
           font-weight: 800; line-height: 20px; box-shadow: 0 2px 7px #0003;
