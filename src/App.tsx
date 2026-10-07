@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Heart, Shield, Swords, RotateCcw } from "lucide-react";
 
 type Language = "en" | "hu";
-type Difficulty = "Easy" | "Normal" | "Hard";
+type Difficulty = "Easy" | "Normal" | "Hard" | "Extreme";
 type Suit = "clubs" | "diamonds" | "hearts" | "spades";
 type Rank =
   "A" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K";
@@ -82,6 +82,7 @@ const I18N = {
     easy: "Easy",
     normal: "Normal",
     hard: "Hard",
+    extreme: "Extreme",
     morale: "Morale",
     start: "Start {difficulty} Game",
     rulebook: "Rulebook",
@@ -135,6 +136,10 @@ const I18N = {
     drawLose: "Draw and lose",
     clubWarn: "Use Club at 1 Morale?",
     clubWarnText: "A Joker will be spent immediately if available.",
+    extremeClubTitle: "Choose the Club cost",
+    extremeClubText: "Spend up to {max} Morale. For N Morale, reveal N + 1 cards and choose one.",
+    spendMorale: "Spend {amount} Morale",
+    extremeRule: "15 starting Morale, no Morale recovery after reshuffling, and variable Club cost.",
     continue: "Continue",
     fastResolution: "Fast attack resolution",
     resolutionTitle: "Attack Resolution",
@@ -181,6 +186,7 @@ const I18N = {
     easy: "Könnyű",
     normal: "Normál",
     hard: "Nehéz",
+    extreme: "Extrém",
     morale: "Morál",
     start: "{difficulty} játék indítása",
     rulebook: "Szabálykönyv",
@@ -233,6 +239,10 @@ const I18N = {
     drawLose: "Húzás és vereség",
     clubWarn: "Treff használata 1 Morálnál?",
     clubWarnText: "Ha van elérhető Joker, azonnal felhasználódik.",
+    extremeClubTitle: "Válaszd ki a Treff költségét",
+    extremeClubText: "Legfeljebb {max} Morált költhetsz. N Morálért N + 1 lapot fedhetsz fel, amelyekből egyet választhatsz.",
+    spendMorale: "{amount} Morál elköltése",
+    extremeRule: "15 kezdő Morál, nincs Morálnövelés újrakeveréskor, és változó a Treff költsége.",
     continue: "Folytatás",
     fastResolution: "Gyors támadáskiértékelés",
     resolutionTitle: "Támadás kiértékelése",
@@ -304,7 +314,7 @@ const META = {
   hearts: { s: "♥", n: "Hearts" },
   spades: { s: "♠", n: "Spades" },
 };
-const MORALE = { Easy: 30, Normal: 25, Hard: 20 };
+const MORALE: Record<Difficulty, number> = { Easy: 30, Normal: 25, Hard: 20, Extreme: 15 };
 const ENEMY: { [k: number]: number } = {
   1: 10,
   2: 15,
@@ -430,7 +440,13 @@ export default function App() {
   const t = (key: TKey, values?: Record<string, string | number>) =>
     template(I18N[language][key], values);
   const difficultyName = (d: Difficulty) =>
-    d === "Easy" ? t("easy") : d === "Normal" ? t("normal") : t("hard");
+    d === "Easy"
+      ? t("easy")
+      : d === "Normal"
+        ? t("normal")
+        : d === "Hard"
+          ? t("hard")
+          : t("extreme");
   const phaseName = (p: Phase) =>
     p === "DRAWING"
       ? language === "hu"
@@ -487,6 +503,11 @@ export default function App() {
   const [g, setG] = useState<Game | null>(null);
   const [reset, setReset] = useState(false);
   const [clubWarn, setClubWarn] = useState<string | null>(null);
+  const [extremeClubChoice, setExtremeClubChoice] = useState<{
+    source: "legend" | "battle";
+    id?: string;
+    max: number;
+  } | null>(null);
   const [drawWarn, setDrawWarn] = useState(false);
   const [guardianNotice, setGuardianNotice] = useState(false);
   const [reshuffleReward, setReshuffleReward] = useState<number | null>(null);
@@ -529,7 +550,7 @@ export default function App() {
         <h1>One More Card?!</h1>
         <p>{t("subtitle")}</p>
         <div className="difficulty">
-          {(["Easy", "Normal", "Hard"] as Difficulty[]).map((d) => (
+          {(["Easy", "Normal", "Hard", "Extreme"] as Difficulty[]).map((d) => (
             <button
               className={difficulty === d ? "chosen" : ""}
               onClick={() => setDifficulty(d)}
@@ -538,6 +559,7 @@ export default function App() {
               <span>
                 {MORALE[d]} {t("morale")}
               </span>
+              {d === "Extreme" && <small>{t("extremeRule")}</small>}
             </button>
           ))}
         </div>
@@ -586,7 +608,7 @@ export default function App() {
       y.attackDeck = shuffle(y.discard);
       y.discard = [];
       const moraleBeforeReshuffle = y.currentMorale;
-      if (y.difficulty !== "Hard")
+      if (y.difficulty !== "Hard" && y.difficulty !== "Extreme")
         y.currentMorale = Math.min(
           y.maximumMorale,
           y.currentMorale + y.enemyLevel,
@@ -628,14 +650,18 @@ export default function App() {
       selected: flags(),
       notice: "Choose optional Legend abilities, then resolve.",
     });
-  const beginClub = (source: "legend" | "battle", id?: string) => {
+  const beginClub = (
+    source: "legend" | "battle",
+    id?: string,
+    moraleCost = 1,
+  ) => {
     let x = {
       ...g,
       usedClubs: source === "battle" && id ? [...g.usedClubs, id] : g.usedClubs,
       legendUsed:
         source === "legend" ? { ...g.legendUsed, clubs: true } : g.legendUsed,
     };
-    const [m, lost, joker] = loseMorale(x, 1);
+    const [m, lost, joker] = loseMorale(x, moraleCost);
     if (joker) setGuardianNotice(true);
     if (lost)
       return setG({
@@ -646,8 +672,9 @@ export default function App() {
       });
     let y = m,
       n =
-        (source === "legend" ? g.legends.clubs.length : g.battleground.length) +
-        1,
+        g.difficulty === "Extreme"
+          ? moraleCost + 1
+          : (source === "legend" ? g.legends.clubs.length : g.battleground.length) + 1,
       cs: C[] = [];
     for (let i = 0; i < n; i++) {
       const [z, c] = prepare(y);
@@ -662,10 +689,16 @@ export default function App() {
       notice: `Choose one of ${cs.length} cards.`,
     });
   };
-  const askClub = (source: "legend" | "battle", id?: string) =>
+  const askClub = (source: "legend" | "battle", id?: string) => {
+    if (g.difficulty === "Extreme") {
+      const max = source === "legend" ? g.legends.clubs.length : g.battleground.length;
+      setExtremeClubChoice({ source, id, max: Math.max(1, max) });
+      return;
+    }
     g.currentMorale === 1
       ? setClubWarn(source === "legend" ? "legend" : id || "")
       : beginClub(source, id);
+  };
   const chooseClub = (c: C) =>
     setG(
       enter(
@@ -1244,85 +1277,51 @@ export default function App() {
       </div>
       <QuickReference language={language} t={t} />
       <style>{`
-        .phase.club_selection {
-          position: relative;
-          min-height: 150px;
-        }
+        .phase.club_selection { position: relative; min-height: 150px; }
         .phaseClubSelection {
-          position: absolute;
-          top: 50%;
-          right: 16px;
-          z-index: 3;
-          transform: translateY(-50%);
-          display: grid;
-          align-content: center;
-          width: max-content;
-          max-width: calc(100% - 310px);
-          padding: 9px 11px;
-          color: #fff;
-          background: rgba(255, 255, 255, 0.12);
-          border: 2px dashed rgba(255, 255, 255, 0.68);
-          border-radius: 12px;
+          position: absolute; top: 50%; right: 16px; z-index: 3;
+          transform: translateY(-50%); display: grid; align-content: center;
+          width: max-content; max-width: calc(100% - 310px); padding: 9px 11px;
+          color: #fff; background: rgba(255, 255, 255, 0.12);
+          border: 2px dashed rgba(255, 255, 255, 0.68); border-radius: 12px;
         }
         .phaseClubSelection > small {
-          display: block;
-          margin-bottom: 6px;
-          color: rgba(255, 255, 255, 0.94);
-          font-weight: 700;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
+          display: block; margin-bottom: 6px; color: rgba(255, 255, 255, 0.94);
+          font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
         }
         .phaseClubSelectionCards {
-          display: flex;
-          flex-wrap: nowrap;
-          align-items: center;
-          justify-content: flex-end;
-          gap: 7px;
-          overflow-x: auto;
-          padding: 2px 1px 4px;
-          scrollbar-width: thin;
+          display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-end;
+          gap: 7px; overflow-x: auto; padding: 2px 1px 4px; scrollbar-width: thin;
         }
-        .phaseClubSelectionCards .card {
-          flex: 0 0 auto;
-          margin: 0;
-        }
+        .phaseClubSelectionCards .card { flex: 0 0 auto; margin: 0; }
         @media (max-width: 800px) {
-          .phase.club_selection {
-            min-height: 142px;
-          }
+          .phase.club_selection { min-height: 126px; }
           .phaseClubSelection {
-            right: 7px;
-            max-width: calc(100% - 165px);
-            padding: 7px;
+            right: 7px; max-width: calc(100% - 155px); padding: 6px 7px;
           }
-          .phaseClubSelectionCards {
-            gap: 5px;
-          }
+          .phaseClubSelection > small { margin-bottom: 3px; font-size: 9px; }
+          .phaseClubSelectionCards { gap: 4px; padding-bottom: 1px; }
           .phaseClubSelectionCards .card {
-            transform: scale(0.88);
-            transform-origin: center;
-            margin: -4px;
+            width: 38px !important; min-width: 38px !important; height: 54px !important;
+            padding: 3px !important; font-size: 12px !important; border-radius: 7px !important;
           }
+          .phaseClubSelectionCards .card b { font-size: 13px !important; }
+          .phaseClubSelectionCards .card strong { font-size: 14px !important; }
           .phaseClubSelection.manyCards {
-            position: relative;
-            top: auto;
-            right: auto;
-            transform: none;
-            grid-column: 1 / -1;
-            width: calc(100% - 16px);
-            max-width: none;
+            position: relative; top: auto; right: auto; transform: none;
+            grid-column: 1 / -1; width: calc(100% - 16px); max-width: none;
             margin: 5px 8px 8px;
           }
           .phaseClubSelection.manyCards .phaseClubSelectionCards {
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            overflow-x: visible;
+            flex-wrap: wrap; justify-content: flex-start; overflow-x: visible;
           }
         }
         @media (min-width: 801px) {
-          .phaseClubSelectionCards {
-            flex-wrap: nowrap;
-          }
+          .phaseClubSelectionCards { flex-wrap: nowrap; }
+        }
+        .extremeClubCostChoices {
+          display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+          gap: 8px; margin: 14px 0;
         }
         .attackDeckInspectSlot {
           position: relative; display: grid; justify-items: center;
@@ -1447,7 +1446,7 @@ export default function App() {
           <h2>{t("resetTitle")}</h2>
           <p>{t("resetText")}</p>
           <div className="actions">
-            {(["Easy", "Normal", "Hard"] as Difficulty[]).map((d) => (
+            {(["Easy", "Normal", "Hard", "Extreme"] as Difficulty[]).map((d) => (
               <button
                 onClick={() => {
                   setG(fresh(d));
@@ -1507,6 +1506,28 @@ export default function App() {
           </div>
         </Modal>
       )}
+      {extremeClubChoice && (
+        <Modal>
+          <h2>{t("extremeClubTitle")}</h2>
+          <p>{t("extremeClubText", { max: extremeClubChoice.max })}</p>
+          <div className="extremeClubCostChoices">
+            {Array.from({ length: extremeClubChoice.max }, (_, index) => index + 1).map((amount) => (
+              <button
+                key={amount}
+                className={amount === 1 ? "primary" : ""}
+                onClick={() => {
+                  const choice = extremeClubChoice;
+                  setExtremeClubChoice(null);
+                  beginClub(choice.source, choice.id, amount);
+                }}
+              >
+                {t("spendMorale", { amount })} → {amount + 1} {t("cards").toLowerCase()}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setExtremeClubChoice(null)}>{t("cancel")}</button>
+        </Modal>
+      )}
       {clubWarn !== null && (
         <Modal>
           <h2>{t("clubWarn")}</h2>
@@ -1549,8 +1570,8 @@ function QuickReference({
     ["8", language === "hu" ? "Király" : "King", "100"],
   ];
   const difficulties = language === "hu"
-    ? [["Nehéz", "20", "Nincs Morálnövelés újrakeveréskor"], ["Normál", "25", "Nincs"], ["Könnyű", "30", "Az ellenségszín nem blokkolja a Legendákat"]]
-    : [["Hard", "20", "No Morale recovery after reshuffling"], ["Normal", "25", "None"], ["Easy", "30", "Enemy suits do not block Legends"]];
+    ? [["Extrém", "15", "Nincs Morálnövelés újrakeveréskor; a Treff költsége szabadon választható 1 és a Képességerő között"], ["Nehéz", "20", "Nincs Morálnövelés újrakeveréskor"], ["Normál", "25", "Nincs"], ["Könnyű", "30", "Az ellenségszín nem blokkolja a Legendákat"]]
+    : [["Extreme", "15", "No Morale recovery after reshuffling; choose Club cost from 1 to Ability Strength"], ["Hard", "20", "No Morale recovery after reshuffling"], ["Normal", "25", "None"], ["Easy", "30", "Enemy suits do not block Legends"]];
   return (
     <section className="quickReference" aria-labelledby="quick-reference-title">
       <h2 id="quick-reference-title">{t("quickReference")}</h2>
