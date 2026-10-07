@@ -487,23 +487,28 @@ export default function App() {
   const [g, setG] = useState<Game | null>(null);
   const [reset, setReset] = useState(false);
   const [clubWarn, setClubWarn] = useState<string | null>(null);
-  const [sortCards, setSortCards] = useState(false);
   const [drawWarn, setDrawWarn] = useState(false);
   const [guardianNotice, setGuardianNotice] = useState(false);
   const [reshuffleReward, setReshuffleReward] = useState<number | null>(null);
-  const [fastResolution, setFastResolution] = useState(() =>
-    localStorage.getItem("one-more-card-fast-resolution") === "true",
-  );
+  const [showAttackDeck, setShowAttackDeck] = useState(false);
   const [resolutionPreview, setResolutionPreview] = useState<ResolutionPreview | null>(null);
   const [resolutionStep, setResolutionStep] = useState(0);
-  const changeFastResolution = (value: boolean) => {
-    localStorage.setItem("one-more-card-fast-resolution", String(value));
-    setFastResolution(value);
-  };
   const suitName = (suit: Suit) =>
     suit === "clubs" ? t("clubsName") :
     suit === "diamonds" ? t("diamondsName") :
     suit === "hearts" ? t("heartsName") : t("spadesName");
+  const sortedAttackDeck = useMemo(() => {
+    if (!g) return [] as C[];
+    const suitOrder: Record<Suit, number> = {
+      clubs: 0,
+      diamonds: 1,
+      hearts: 2,
+      spades: 3,
+    };
+    return [...g.attackDeck].sort(
+      (a, b) => a.value - b.value || suitOrder[a.suit] - suitOrder[b.suit],
+    );
+  }, [g?.attackDeck]);
 
   useEffect(() => {
     if (!resolutionPreview || resolutionStep >= 3) return;
@@ -722,10 +727,6 @@ export default function App() {
   };
 
   const resolve = () => {
-    if (fastResolution) {
-      applyResolution();
-      return;
-    }
     const preview = createResolutionPreview();
     if (!preview) return;
     setResolutionStep(0);
@@ -893,12 +894,10 @@ export default function App() {
     });
   };
   const displayCards = (cards: C[]) =>
-    sortCards
-      ? [...cards].sort(
-          (a, b) =>
-            a.value - b.value || SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit),
-        )
-      : cards;
+    [...cards].sort(
+      (a, b) =>
+        a.value - b.value || SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit),
+    );
   const available = SUITS.filter(
     (s) =>
       s !== "clubs" &&
@@ -924,26 +923,8 @@ export default function App() {
           </h1>
           <p>{noticeText(g.notice)}</p>
         </div>
-        {/* Jobb oldali fejlécműveletek: rendezési könnyítés és új játék. */}
+        {/* Jobb oldali fejlécműveletek: új játék és szabálykönyv. */}
         <div className="headerActions">
-          <div className="headerToggles">
-            <label className="sortToggle">
-              <input
-                type="checkbox"
-                checked={sortCards}
-                onChange={(e) => setSortCards(e.target.checked)}
-              />
-              {t("sort")}
-            </label>
-            <label className="sortToggle">
-              <input
-                type="checkbox"
-                checked={fastResolution}
-                onChange={(e) => changeFastResolution(e.target.checked)}
-              />
-              {t("fastResolution")}
-            </label>
-          </div>
           <div className="headerButtonStack">
             <button onClick={() => setReset(true)}>
               <RotateCcw /> {t("newGame")}
@@ -983,7 +964,18 @@ export default function App() {
         {/* Small card méretű Enemy Deck és Attack Deck. */}
         <div className="topDecks">
           <Stack n={g.enemyDeck.length} label={t("enemyDeck")} />
-          <Stack n={g.attackDeck.length} label={t("attackDeck")} />
+          <div className="attackDeckInspectSlot">
+            <Stack n={g.attackDeck.length} label={t("attackDeck")} />
+            <button
+              type="button"
+              className="attackDeckInspectButton"
+              onClick={() => setShowAttackDeck(true)}
+              aria-label={language === "hu" ? "A Támadópakli megtekintése" : "View the Attack Deck"}
+              title={language === "hu" ? "A még pakliban lévő lapok" : "Cards remaining in the deck"}
+            >
+              ?
+            </button>
+          </div>
         </div>
         {/* Két small card méretű Joker-hely; az elhasznált Joker szürkítve marad. */}
         <div className="jokerPanel">
@@ -1247,6 +1239,97 @@ export default function App() {
         </div>
       </div>
       <QuickReference language={language} t={t} />
+      <style>{`
+        .attackDeckInspectSlot { position: relative; display: grid; justify-items: center; }
+        .attackDeckInspectButton {
+          position: absolute; top: -5px; right: -7px; z-index: 2;
+          width: 24px; height: 24px; padding: 0; border-radius: 999px;
+          color: #fff; background: #365b48; border: 2px solid #fff;
+          font-weight: 800; line-height: 20px; box-shadow: 0 2px 7px #0003;
+        }
+        .attackDeckInspectOverlay {
+          position: fixed; inset: 0; z-index: 1000; background: #0f172a1f;
+          pointer-events: auto;
+        }
+        .attackDeckInspectPanel {
+          position: fixed; top: 74px; right: 14px; z-index: 1001;
+          width: min(430px, calc(100vw - 28px)); max-height: calc(100vh - 94px);
+          overflow: auto; padding: 14px; color: #1f2937; background: #fffdf7;
+          border: 1px solid #c8bfae; border-radius: 15px; box-shadow: 0 18px 48px #0004;
+        }
+        .attackDeckInspectHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+        .attackDeckInspectHeader h2 { margin: 0 0 4px; color: #365b48; font-size: 20px; }
+        .attackDeckInspectHeader p { margin: 0 0 12px; color: #64748b; font-size: 12px; line-height: 1.35; }
+        .attackDeckInspectClose {
+          flex: 0 0 auto; width: 30px; height: 30px; padding: 0; border-radius: 999px;
+          color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 20px; line-height: 1;
+        }
+        .attackDeckInspectCards {
+          display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+          align-items: start; gap: 7px; padding: 10px; background: #f8f6ef;
+          border: 1px solid #ded8ca; border-radius: 11px;
+        }
+        .attackDeckInspectCards .card.small { margin: 0 auto; }
+        .attackDeckInspectEmpty { padding: 18px; text-align: center; background: #f8f6ef; border-radius: 10px; }
+        .attackDeckInspectOk { display: block; min-width: 110px; margin: 12px auto 0; }
+        @media (max-width: 800px) {
+          .attackDeckInspectOverlay { background: #0f172a40; }
+          .attackDeckInspectPanel {
+            top: auto; right: 8px; bottom: 8px; left: 8px; width: auto;
+            max-height: min(68vh, 540px); padding: 11px; border-radius: 14px;
+          }
+          .attackDeckInspectHeader h2 { font-size: 18px; }
+          .attackDeckInspectCards {
+            grid-template-columns: repeat(auto-fill, minmax(43px, 1fr)); gap: 5px; padding: 8px;
+          }
+        }
+      `}</style>
+      {showAttackDeck && (
+        <div className="attackDeckInspectOverlay" role="presentation" onClick={() => setShowAttackDeck(false)}>
+          <section
+            className="attackDeckInspectPanel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="attack-deck-inspect-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="attackDeckInspectHeader">
+              <div>
+                <h2 id="attack-deck-inspect-title">
+                  {language === "hu" ? "A Támadópakli lapjai" : "Cards in the Attack Deck"}
+                </h2>
+                <p>
+                  {language === "hu"
+                    ? `${sortedAttackDeck.length} lap, érték szerinti sorrendben. A pakli tényleges sorrendje rejtve marad.`
+                    : `${sortedAttackDeck.length} cards, sorted by value. Their actual deck order remains hidden.`}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="attackDeckInspectClose"
+                onClick={() => setShowAttackDeck(false)}
+                aria-label={language === "hu" ? "Bezárás" : "Close"}
+              >
+                ×
+              </button>
+            </div>
+            {sortedAttackDeck.length ? (
+              <div className="attackDeckInspectCards">
+                {sortedAttackDeck.map((card, index) => (
+                  <CardView key={`${card.suit}-${card.rank}-${index}`} c={card} small />
+                ))}
+              </div>
+            ) : (
+              <p className="attackDeckInspectEmpty">
+                {language === "hu" ? "A Támadópakli üres." : "The Attack Deck is empty."}
+              </p>
+            )}
+            <button type="button" className="primary attackDeckInspectOk" onClick={() => setShowAttackDeck(false)}>
+              {t("understood")}
+            </button>
+          </section>
+        </div>
+      )}
       {g.phase === "BATTLE_END" && (
         <Modal>
           <h2>{t("congratulations")}</h2>
