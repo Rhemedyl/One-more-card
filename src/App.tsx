@@ -1243,11 +1243,12 @@ export default function App() {
       <style>{`
         .phaseClubSelection {
           align-self: stretch;
+          flex: 0 1 46%;
           display: grid;
           align-content: center;
-          min-width: 210px;
-          max-width: min(46vw, 520px);
-          margin: 8px 10px 8px auto;
+          min-width: 190px;
+          max-width: min(46%, 520px);
+          margin: 7px 9px 7px auto;
           padding: 8px 10px;
           color: #fff;
           background: rgba(255, 255, 255, 0.12);
@@ -1277,18 +1278,43 @@ export default function App() {
         }
         @media (max-width: 800px) {
           .phase.club_selection {
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+          }
+          .phase.club_selection .phaseEnemy {
+            flex: 0 0 auto;
+          }
+          .phase.club_selection .phaseInfo {
+            flex: 1 1 auto;
+            min-width: 0;
           }
           .phaseClubSelection {
-            order: 3;
-            width: calc(100% - 16px);
-            min-width: 0;
-            max-width: none;
-            margin: 4px 8px 8px;
-            padding: 8px;
+            flex: 0 1 52%;
+            width: auto;
+            min-width: 145px;
+            max-width: 52%;
+            margin: 6px 7px 6px auto;
+            padding: 7px;
           }
           .phaseClubSelectionCards {
-            justify-content: flex-start;
+            justify-content: flex-end;
+            gap: 5px;
+          }
+          .phaseClubSelectionCards .card {
+            transform: scale(0.88);
+            transform-origin: center;
+            margin: -4px;
+          }
+        }
+        @media (max-width: 480px) {
+          .phaseClubSelection {
+            flex-basis: 56%;
+            max-width: 56%;
+            min-width: 136px;
+            margin-right: 5px;
+          }
+          .phaseClubSelection > small {
+            margin-bottom: 4px;
+            font-size: 10px;
           }
         }
         .attackDeckInspectSlot {
