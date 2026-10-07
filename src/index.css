@@ -1395,3 +1395,157 @@ header button,
     font-size: 11px;
   }
 }
+
+/* ================================================================
+   APP-SPECIFIC COMPONENT STYLES
+   Moved from App.tsx so layout and responsive rules live in one place.
+   ================================================================ */
+.menu .difficulty {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  width: min(100%, 420px) !important;
+  max-width: 420px !important;
+  margin: 30px auto !important;
+}
+.menu .difficulty > button.difficultyOption {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 58px !important;
+  border-width: 2px !important;
+  color: #1f2937 !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.menu .difficulty > button.difficultyEasy {
+  background-color: #dff3df !important;
+  border-color: #83bd83 !important;
+}
+.menu .difficulty > button.difficultyNormal {
+  background-color: #fff4ad !important;
+  border-color: #d9bd43 !important;
+}
+.menu .difficulty > button.difficultyHard {
+  background-color: #ffd29b !important;
+  border-color: #dc8b35 !important;
+}
+.menu .difficulty > button.difficultyExtreme {
+  background-color: #f7b0aa !important;
+  border-color: #c94e48 !important;
+}
+.menu .difficulty > button.difficultyOption.chosen {
+  outline: 3px solid #ffffff !important;
+  box-shadow: 0 0 0 6px #365b48 !important;
+  transform: translateY(-1px);
+}
+.phase.club_selection { position: relative; min-height: 150px; }
+.phaseClubSelection {
+  position: absolute; top: 50%; right: 16px; z-index: 3;
+  transform: translateY(-50%); display: grid; align-content: center;
+  width: max-content; max-width: calc(100% - 310px); padding: 9px 11px;
+  color: #fff; background: rgba(255, 255, 255, 0.12);
+  border: 2px dashed rgba(255, 255, 255, 0.68); border-radius: 12px;
+}
+.phaseClubSelection > small {
+  display: block; margin-bottom: 6px; color: rgba(255, 255, 255, 0.94);
+  font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.phaseClubSelectionCards {
+  flex-wrap: nowrap; align-items: center; justify-content: flex-end;
+  gap: 7px; overflow-x: auto; padding: 2px 1px 4px; scrollbar-width: thin;
+}
+.phaseClubSelectionDesktop { display: flex; }
+.phaseClubSelectionMobile { display: none; }
+.phaseClubSelectionCards .card { flex: 0 0 auto; margin: 0; }
+.extremeClubCostChoices {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 8px; margin: 14px 0;
+}
+@media (max-width: 800px) {
+  .phase.club_selection { min-height: 112px; }
+  .phaseClubSelection {
+    right: 6px; width: calc(100% - 145px); max-width: calc(100% - 145px); padding: 5px 6px;
+  }
+  .phaseClubSelection > small { margin-bottom: 2px; font-size: 9px; }
+  .phaseClubSelectionDesktop { display: none; }
+  .phaseClubSelectionMobile {
+    display: flex; gap: 2px; overflow-x: auto; overflow-y: hidden;
+    justify-content: flex-start; padding-bottom: 1px;
+  }
+  .phaseClubSelectionMobile > button.card.small {
+    flex: 0 0 21px !important;
+    width: 21px !important;
+    min-width: 21px !important;
+    max-width: 21px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    margin: 0 !important;
+    padding: 1px 0 0 !important;
+    gap: 1px !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    border-width: 1px !important;
+    border-radius: 3px !important;
+  }
+  .phaseClubSelectionMobile > button.card.small b {
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+  .phaseClubSelectionMobile > button.card.small strong {
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+}
+.attackDeckInspectSlot {
+  position: relative; display: grid; justify-items: center;
+}
+.attackDeckInspectButton {
+  position: absolute; left: 50%; top: 38px; z-index: 2;
+  transform: translate(-50%, -50%);
+  width: 24px; height: 24px; padding: 0; border-radius: 999px;
+  color: #fff; background: #365b48; border: 2px solid #fff;
+  font-weight: 800; line-height: 20px; box-shadow: 0 2px 7px #0003;
+}
+.attackDeckInspectOverlay {
+  position: fixed; inset: 0; z-index: 1000; background: #0f172a1f;
+  pointer-events: auto;
+}
+.attackDeckInspectPanel {
+  position: fixed; top: 74px; right: 14px; z-index: 1001;
+  width: min(430px, calc(100vw - 28px)); max-height: calc(100vh - 94px);
+  overflow: auto; padding: 14px; color: #1f2937; background: #fffdf7;
+  border: 1px solid #c8bfae; border-radius: 15px; box-shadow: 0 18px 48px #0004;
+}
+.attackDeckInspectHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.attackDeckInspectHeader h2 { margin: 0 0 4px; color: #365b48; font-size: 20px; }
+.attackDeckInspectHeader p { margin: 0 0 12px; color: #64748b; font-size: 12px; line-height: 1.35; }
+.attackDeckInspectClose {
+  flex: 0 0 auto; width: 30px; height: 30px; padding: 0; border-radius: 999px;
+  color: #475569; background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 20px; line-height: 1;
+}
+.attackDeckInspectCards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+  align-items: start; gap: 7px; padding: 10px; background: #f8f6ef;
+  border: 1px solid #ded8ca; border-radius: 11px;
+}
+.attackDeckInspectCards .card.small { margin: 0 auto; }
+.attackDeckInspectEmpty { padding: 18px; text-align: center; background: #f8f6ef; border-radius: 10px; }
+.attackDeckInspectOk { display: block; min-width: 110px; margin: 12px auto 0; }
+@media (max-width: 800px) {
+  .attackDeckInspectOverlay { background: #0f172a40; }
+  .attackDeckInspectPanel {
+    top: auto; right: 8px; bottom: 8px; left: 8px; width: auto;
+    max-height: min(68vh, 540px); padding: 11px; border-radius: 14px;
+  }
+  .attackDeckInspectHeader h2 { font-size: 18px; }
+  .attackDeckInspectCards {
+    grid-template-columns: repeat(auto-fill, minmax(43px, 1fr)); gap: 5px; padding: 8px;
+  }
+}
