@@ -1019,7 +1019,10 @@ export default function App() {
           )}
         </div>
         {g.phase === "CLUB_SELECTION" && (
-          <div className="phaseClubSelection" aria-label={t("clubSelection")}>
+          <div
+            className={`phaseClubSelection ${g.clubSelection.length > 4 ? "manyCards" : ""}`}
+            aria-label={t("clubSelection")}
+          >
             <small>{t("clubSelection")}</small>
             <div className="phaseClubSelectionCards">
               {g.clubSelection.map((c) => (
@@ -1241,30 +1244,37 @@ export default function App() {
       </div>
       <QuickReference language={language} t={t} />
       <style>{`
+        .phase.club_selection {
+          position: relative;
+          min-height: 150px;
+        }
         .phaseClubSelection {
-          align-self: stretch;
-          flex: 0 1 46%;
+          position: absolute;
+          top: 50%;
+          right: 16px;
+          z-index: 3;
+          transform: translateY(-50%);
           display: grid;
           align-content: center;
-          min-width: 190px;
-          max-width: min(46%, 520px);
-          margin: 7px 9px 7px auto;
-          padding: 8px 10px;
+          width: max-content;
+          max-width: calc(100% - 310px);
+          padding: 9px 11px;
           color: #fff;
           background: rgba(255, 255, 255, 0.12);
-          border: 2px dashed rgba(255, 255, 255, 0.62);
+          border: 2px dashed rgba(255, 255, 255, 0.68);
           border-radius: 12px;
         }
         .phaseClubSelection > small {
           display: block;
           margin-bottom: 6px;
-          color: rgba(255, 255, 255, 0.9);
+          color: rgba(255, 255, 255, 0.94);
           font-weight: 700;
           letter-spacing: 0.04em;
           text-transform: uppercase;
         }
         .phaseClubSelectionCards {
           display: flex;
+          flex-wrap: nowrap;
           align-items: center;
           justify-content: flex-end;
           gap: 7px;
@@ -1278,25 +1288,14 @@ export default function App() {
         }
         @media (max-width: 800px) {
           .phase.club_selection {
-            flex-wrap: nowrap;
-          }
-          .phase.club_selection .phaseEnemy {
-            flex: 0 0 auto;
-          }
-          .phase.club_selection .phaseInfo {
-            flex: 1 1 auto;
-            min-width: 0;
+            min-height: 142px;
           }
           .phaseClubSelection {
-            flex: 0 1 52%;
-            width: auto;
-            min-width: 145px;
-            max-width: 52%;
-            margin: 6px 7px 6px auto;
+            right: 7px;
+            max-width: calc(100% - 165px);
             padding: 7px;
           }
           .phaseClubSelectionCards {
-            justify-content: flex-end;
             gap: 5px;
           }
           .phaseClubSelectionCards .card {
@@ -1304,17 +1303,25 @@ export default function App() {
             transform-origin: center;
             margin: -4px;
           }
-        }
-        @media (max-width: 480px) {
-          .phaseClubSelection {
-            flex-basis: 56%;
-            max-width: 56%;
-            min-width: 136px;
-            margin-right: 5px;
+          .phaseClubSelection.manyCards {
+            position: relative;
+            top: auto;
+            right: auto;
+            transform: none;
+            grid-column: 1 / -1;
+            width: calc(100% - 16px);
+            max-width: none;
+            margin: 5px 8px 8px;
           }
-          .phaseClubSelection > small {
-            margin-bottom: 4px;
-            font-size: 10px;
+          .phaseClubSelection.manyCards .phaseClubSelectionCards {
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            overflow-x: visible;
+          }
+        }
+        @media (min-width: 801px) {
+          .phaseClubSelectionCards {
+            flex-wrap: nowrap;
           }
         }
         .attackDeckInspectSlot {
