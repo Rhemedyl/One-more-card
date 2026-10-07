@@ -139,7 +139,6 @@ const I18N = {
     extremeClubTitle: "Choose the Club cost",
     extremeClubText: "Spend up to {max} Morale. For N Morale, reveal N + 1 cards and choose one.",
     spendMorale: "Spend {amount} Morale",
-    extremeRule: "15 starting Morale, no Morale recovery after reshuffling, and variable Club cost.",
     continue: "Continue",
     fastResolution: "Fast attack resolution",
     resolutionTitle: "Attack Resolution",
@@ -242,7 +241,6 @@ const I18N = {
     extremeClubTitle: "Válaszd ki a Treff költségét",
     extremeClubText: "Legfeljebb {max} Morált költhetsz. N Morálért N + 1 lapot fedhetsz fel, amelyekből egyet választhatsz.",
     spendMorale: "{amount} Morál elköltése",
-    extremeRule: "15 kezdő Morál, nincs Morálnövelés újrakeveréskor, és változó a Treff költsége.",
     continue: "Folytatás",
     fastResolution: "Gyors támadáskiértékelés",
     resolutionTitle: "Támadás kiértékelése",
@@ -552,14 +550,13 @@ export default function App() {
         <div className="difficulty">
           {(["Easy", "Normal", "Hard", "Extreme"] as Difficulty[]).map((d) => (
             <button
-              className={difficulty === d ? "chosen" : ""}
+              className={`difficultyOption difficulty${d} ${difficulty === d ? "chosen" : ""}`}
               onClick={() => setDifficulty(d)}
             >
               <b>{difficultyName(d)}</b>
               <span>
                 {MORALE[d]} {t("morale")}
               </span>
-              {d === "Extreme" && <small>{t("extremeRule")}</small>}
             </button>
           ))}
         </div>
@@ -1052,14 +1049,16 @@ export default function App() {
           )}
         </div>
         {g.phase === "CLUB_SELECTION" && (
-          <div
-            className={`phaseClubSelection ${g.clubSelection.length > 4 ? "manyCards" : ""}`}
-            aria-label={t("clubSelection")}
-          >
+          <div className="phaseClubSelection" aria-label={t("clubSelection")}>
             <small>{t("clubSelection")}</small>
-            <div className="phaseClubSelectionCards">
+            <div className="phaseClubSelectionCards phaseClubSelectionDesktop">
               {g.clubSelection.map((c) => (
                 <CardView key={c.id} c={c} onClick={() => chooseClub(c)} />
+              ))}
+            </div>
+            <div className="phaseClubSelectionCards phaseClubSelectionMobile">
+              {g.clubSelection.map((c) => (
+                <CardView key={c.id} c={c} small onClick={() => chooseClub(c)} />
               ))}
             </div>
           </div>
@@ -1277,6 +1276,27 @@ export default function App() {
       </div>
       <QuickReference language={language} t={t} />
       <style>{`
+        .difficulty {
+          display: grid !important;
+          grid-template-columns: minmax(220px, 420px) !important;
+          justify-content: center;
+          gap: 9px !important;
+          width: 100%;
+        }
+        .difficultyOption {
+          width: 100%;
+          min-height: 58px;
+          border-width: 2px !important;
+          color: #1f2937 !important;
+        }
+        .difficultyEasy { background: #dff3df !important; border-color: #83bd83 !important; }
+        .difficultyNormal { background: #fff4ad !important; border-color: #d9bd43 !important; }
+        .difficultyHard { background: #ffd29b !important; border-color: #dc8b35 !important; }
+        .difficultyExtreme { background: #f7b0aa !important; border-color: #c94e48 !important; }
+        .difficultyOption.chosen {
+          box-shadow: 0 0 0 3px #ffffff, 0 0 0 6px currentColor !important;
+          transform: translateY(-1px);
+        }
         .phase.club_selection { position: relative; min-height: 150px; }
         .phaseClubSelection {
           position: absolute; top: 50%; right: 16px; z-index: 3;
@@ -1290,38 +1310,28 @@ export default function App() {
           font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
         }
         .phaseClubSelectionCards {
-          display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-end;
+          flex-wrap: nowrap; align-items: center; justify-content: flex-end;
           gap: 7px; overflow-x: auto; padding: 2px 1px 4px; scrollbar-width: thin;
         }
+        .phaseClubSelectionDesktop { display: flex; }
+        .phaseClubSelectionMobile { display: none; }
         .phaseClubSelectionCards .card { flex: 0 0 auto; margin: 0; }
-        @media (max-width: 800px) {
-          .phase.club_selection { min-height: 126px; }
-          .phaseClubSelection {
-            right: 7px; max-width: calc(100% - 155px); padding: 6px 7px;
-          }
-          .phaseClubSelection > small { margin-bottom: 3px; font-size: 9px; }
-          .phaseClubSelectionCards { gap: 4px; padding-bottom: 1px; }
-          .phaseClubSelectionCards .card {
-            width: 38px !important; min-width: 38px !important; height: 54px !important;
-            padding: 3px !important; font-size: 12px !important; border-radius: 7px !important;
-          }
-          .phaseClubSelectionCards .card b { font-size: 13px !important; }
-          .phaseClubSelectionCards .card strong { font-size: 14px !important; }
-          .phaseClubSelection.manyCards {
-            position: relative; top: auto; right: auto; transform: none;
-            grid-column: 1 / -1; width: calc(100% - 16px); max-width: none;
-            margin: 5px 8px 8px;
-          }
-          .phaseClubSelection.manyCards .phaseClubSelectionCards {
-            flex-wrap: wrap; justify-content: flex-start; overflow-x: visible;
-          }
-        }
-        @media (min-width: 801px) {
-          .phaseClubSelectionCards { flex-wrap: nowrap; }
-        }
         .extremeClubCostChoices {
           display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
           gap: 8px; margin: 14px 0;
+        }
+        @media (max-width: 800px) {
+          .phase.club_selection { min-height: 112px; }
+          .phaseClubSelection {
+            right: 6px; max-width: calc(100% - 145px); padding: 5px 6px;
+          }
+          .phaseClubSelection > small { margin-bottom: 2px; font-size: 9px; }
+          .phaseClubSelectionDesktop { display: none; }
+          .phaseClubSelectionMobile {
+            display: flex; gap: 3px; overflow-x: auto; overflow-y: hidden;
+            justify-content: flex-start; padding-bottom: 1px;
+          }
+          .phaseClubSelectionMobile .card.small { flex: 0 0 auto; margin: 0; }
         }
         .attackDeckInspectSlot {
           position: relative; display: grid; justify-items: center;
@@ -1570,7 +1580,7 @@ function QuickReference({
     ["8", language === "hu" ? "Király" : "King", "100"],
   ];
   const difficulties = language === "hu"
-    ? [["Extrém", "15", "Nincs Morálnövelés újrakeveréskor; a Treff költsége szabadon választható 1 és a Képességerő között"], ["Nehéz", "20", "Nincs Morálnövelés újrakeveréskor"], ["Normál", "25", "Nincs"], ["Könnyű", "30", "Az ellenségszín nem blokkolja a Legendákat"]]
+    ? [["Extrém", "15", "Nincs Morálnövelés újrakeveréskor; a Treff költsége 1 és a Képességerő között választható"], ["Nehéz", "20", "Nincs Morálnövelés újrakeveréskor"], ["Normál", "25", "Nincs"], ["Könnyű", "30", "Az ellenségszín nem blokkolja a Legendákat"]]
     : [["Extreme", "15", "No Morale recovery after reshuffling; choose Club cost from 1 to Ability Strength"], ["Hard", "20", "No Morale recovery after reshuffling"], ["Normal", "25", "None"], ["Easy", "30", "Enemy suits do not block Legends"]];
   return (
     <section className="quickReference" aria-labelledby="quick-reference-title">
