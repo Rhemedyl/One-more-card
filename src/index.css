@@ -1123,8 +1123,8 @@ header button,
   .discardCards .card strong {
     display: block;
     align-self: center;
-    font-size: 8px;
-    line-height: 1;
+    font-size: 12px;
+    line-height: 0.85;
   }
 }
 
@@ -1499,8 +1499,8 @@ header button,
     line-height: 1 !important;
   }
   .phaseClubSelectionMobile > button.card.small strong {
-    font-size: 8px !important;
-    line-height: 1 !important;
+    font-size: 12px !important;
+    line-height: 0.85 !important;
   }
 }
 .attackDeckInspectSlot {
