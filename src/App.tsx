@@ -47,6 +47,7 @@ type ResolutionPreview = {
 
 type Game = {
   phase: Phase;
+  demo: boolean;
   difficulty: Difficulty;
   currentMorale: number;
   maximumMorale: number;
@@ -85,6 +86,10 @@ const I18N = {
     extreme: "Extreme",
     morale: "Morale",
     start: "Start {difficulty} Game",
+    startDemo: "Start Example Battle",
+    restartDemo: "Restart Example Battle",
+    demoLabel: "Example Battle",
+    demoHint: "Play the fixed two-round example from the rulebook.",
     rulebook: "Rulebook",
     readRules: "Read the Rulebook",
     newGame: "New game",
@@ -188,6 +193,10 @@ const I18N = {
     extreme: "Extrém",
     morale: "Morál",
     start: "{difficulty} játék indítása",
+    startDemo: "Példacsata indítása",
+    restartDemo: "Példacsata újraindítása",
+    demoLabel: "Példacsata",
+    demoHint: "Játszd végig a szabálykönyv kötött, kétkörös példacsatáját.",
     rulebook: "Szabálykönyv",
     readRules: "Szabálykönyv megnyitása",
     newGame: "Új játék",
@@ -358,6 +367,7 @@ function fresh(d: Difficulty): Game {
     atk = new Set<Rank>(["A", "2", "3", "4"]);
   return {
     phase: "DRAWING",
+    demo: false,
     difficulty: d,
     currentMorale: MORALE[d],
     maximumMorale: MORALE[d],
@@ -384,6 +394,48 @@ function fresh(d: Difficulty): Game {
     notice: "The first battle is ready. Draw the first Attack card.",
     summary: null,
     victory: false,
+  };
+}
+function exampleBattle(): Game {
+  const game = fresh("Normal");
+  const all = deck();
+  const byId = (id: string) => {
+    const card = all.find((candidate) => candidate.id === id);
+    if (!card) throw new Error(`Missing demo card: ${id}`);
+    return card;
+  };
+
+  // Visible draw order:
+  // 3♠, A♣, then Club reveals 4♥ / 3♦ / A♥, followed by A♦ / A♠.
+  const scriptedIds = [
+    "3-spades",
+    "A-clubs",
+    "4-hearts",
+    "3-diamonds",
+    "A-hearts",
+    "A-diamonds",
+    "A-spades",
+  ];
+  const scripted = scriptedIds.map(byId);
+  const scriptedSet = new Set(scriptedIds);
+  const normalAttackRanks = new Set<Rank>(["A", "2", "3", "4"]);
+  const randomRemainder = shuffle(
+    all.filter(
+      (card) => normalAttackRanks.has(card.rank) && !scriptedSet.has(card.id),
+    ),
+  );
+
+  return {
+    ...game,
+    demo: true,
+    attackDeck: [...randomRemainder, ...scripted.slice().reverse()],
+    currentEnemy: [
+      byId("5-spades"),
+      byId("5-diamonds"),
+      byId("5-hearts"),
+      byId("5-clubs"),
+    ],
+    notice: "The example battle is ready. Draw the 3♠.",
   };
 }
 function CardView({
@@ -470,6 +522,8 @@ export default function App() {
     const m: Record<string, string> = {
       "The first battle is ready. Draw the first Attack card.":
         "Az első csata előkészítve. Húzd fel az első Támadólapot.",
+      "The example battle is ready. Draw the 3♠.":
+        "A példacsata előkészítve. Húzd fel a 3♠ lapot.",
       "No drawable card exists.": "Nincs több húzható lap.",
       "Choose optional Legend abilities, then resolve.":
         "Válaszd ki az opcionális Legenda-képességeket, majd értékeld ki a támadást.",
@@ -563,6 +617,12 @@ export default function App() {
         <button className="primary" onClick={() => setG(fresh(difficulty))}>
           {t("start", { difficulty: difficultyName(difficulty) })}
         </button>
+        <div className="demoStartPanel">
+          <button className="demoStartButton" onClick={() => setG(exampleBattle())}>
+            {t("startDemo")}
+          </button>
+          <small>{t("demoHint")}</small>
+        </div>
         <a
           className="rulebookLink menuRulebookLink"
           href={RULEBOOK_URLS[language]}
@@ -950,6 +1010,7 @@ export default function App() {
             <em>
               {t("level")} {g.enemyLevel}
             </em>
+            {g.demo && <span className="demoBadge">{t("demoLabel")}</span>}
           </h1>
           <p>{noticeText(g.notice)}</p>
         </div>
@@ -1342,8 +1403,11 @@ export default function App() {
         <Modal>
           <h2>{g.victory ? t("won") : t("lost")}</h2>
           <p>{g.victory ? t("wonText") : noticeText(g.notice)}</p>
-          <button className="primary" onClick={() => setG(fresh(g.difficulty))}>
-            {t("startNew")}
+          <button
+            className="primary"
+            onClick={() => setG(g.demo ? exampleBattle() : fresh(g.difficulty))}
+          >
+            {g.demo ? t("restartDemo") : t("startNew")}
           </button>
         </Modal>
       )}
@@ -1362,6 +1426,15 @@ export default function App() {
                 {d}
               </button>
             ))}
+            <button
+              className="demoResetButton"
+              onClick={() => {
+                setG(exampleBattle());
+                setReset(false);
+              }}
+            >
+              {t("restartDemo")}
+            </button>
             <button onClick={() => setReset(false)}>{t("cancel")}</button>
           </div>
         </Modal>
