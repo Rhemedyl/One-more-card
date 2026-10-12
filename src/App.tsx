@@ -300,6 +300,15 @@ const template = (text: string, values: Record<string, string | number> = {}) =>
   );
 
 const SUITS: Suit[] = ["clubs", "diamonds", "hearts", "spades"];
+
+// The gameplay suit order remains unchanged. This separate array controls
+// only the visual order of the four Legend Areas in the user interface.
+const LEGEND_DISPLAY_ORDER: Suit[] = [
+  "hearts",
+  "spades",
+  "diamonds",
+  "clubs",
+];
 const RANKS: Rank[] = [
   "A",
   "2",
@@ -1246,7 +1255,7 @@ export default function App() {
         <div>
           <Area title={t("legends")}>
             <div className="legendGrid">
-              {SUITS.map((s) => {
+              {LEGEND_DISPLAY_ORDER.map((s) => {
                 const isEmpty = g.legends[s].length === 0;
                 const isUsed = g.legendUsed[s];
                 const isBlocked = blocked(s, true);
