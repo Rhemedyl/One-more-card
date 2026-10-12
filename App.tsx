@@ -324,7 +324,7 @@ function fresh(d: Difficulty): Game {
     battleground: [],
     discard: [],
     removed: [],
-    legends: { clubs: [], diamonds: [], hearts: [], spades: [] },
+    legends: { hearts: [], spades: [], diamonds: [], clubs: [] },
     legendUsed: flags(),
     selected: flags(),
     usedClubs: [],
