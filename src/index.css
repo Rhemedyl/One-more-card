@@ -1549,3 +1549,60 @@ header button,
     grid-template-columns: repeat(auto-fill, minmax(43px, 1fr)); gap: 5px; padding: 8px;
   }
 }
+
+/* ================================================================
+   DETERMINISTIC EXAMPLE BATTLE / DEMO MODE
+   ================================================================ */
+.demoStartPanel {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: min(100%, 420px);
+  margin: 14px auto 0;
+  padding-top: 14px;
+  border-top: 1px solid #d6cdbb;
+}
+.demoStartButton,
+.demoResetButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  color: #365b48;
+  font-weight: 700;
+  background: #eef6f0;
+  border: 2px solid #73a985;
+  border-radius: 10px;
+}
+.demoStartButton:hover,
+.demoStartButton:focus-visible,
+.demoResetButton:hover,
+.demoResetButton:focus-visible {
+  background: #deeee3;
+}
+.demoStartPanel small {
+  color: #64748b;
+  line-height: 1.35;
+}
+.demoBadge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 5px 7px;
+  color: #365b48;
+  font: 700 11px Inter, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: #eef6f0;
+  border: 1px solid #73a985;
+  border-radius: 8px;
+  vertical-align: middle;
+}
+@media (max-width: 800px) {
+  .demoStartPanel {
+    width: min(100%, 360px);
+  }
+  .demoBadge {
+    padding: 3px 5px;
+    font-size: 9px;
+  }
+}
